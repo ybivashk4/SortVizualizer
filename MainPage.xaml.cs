@@ -7,36 +7,37 @@ namespace SortVizualizer
 {
     public partial class MainPage : ContentPage
     {
-        int count = 0;
-            
         public MainPage()
         {
             InitializeComponent();
             BindingContext = new Vizualizer_ViewModel();
+        }       
+    }
+    public class Vizualizer_ViewModel : INotifyPropertyChanged
+    {
+
+        public ObservableCollection<Item> Items { get; set; }
+
+        public Vizualizer_ViewModel()
+        {
+            Items = new ObservableCollection<Item>();
+            for (int i = 1; i < 101; i++)
+            {
+                Items.Add(new Item(i));
+            }
+
+
         }
 
-        public class Vizualizer_ViewModel : INotifyPropertyChanged
+        public event PropertyChangedEventHandler? PropertyChanged;
+        protected virtual void OnPropertyChanged(string propertyName)
         {
-
-            public ObservableCollection<int> Items { get; set; }
-
-            public Vizualizer_ViewModel()
-            {
-                Items = new ObservableCollection<int>();
-                for (int i=1;i<101;i++)
-                {
-                    Items.Add(i);
-                }
-
-
-            }
-
-            public event PropertyChangedEventHandler? PropertyChanged;
-            protected virtual void OnPropertyChanged(string propertyName)
-            {
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
-
+    public class Item : BindableObject
+    {
+        public int Value { get; set; }
+        public Item(int i) { Value = i; }
+    }
 }
