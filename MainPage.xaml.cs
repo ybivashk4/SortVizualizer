@@ -1,24 +1,41 @@
-﻿namespace SortVizualizer
+﻿using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
+using System.Windows.Input;
+
+namespace SortVizualizer
 {
     public partial class MainPage : ContentPage
     {
         int count = 0;
-
+            
         public MainPage()
         {
             InitializeComponent();
+            BindingContext = new Vizualizer_ViewModel();
         }
 
-        private void OnCounterClicked(object sender, EventArgs e)
+        public class Vizualizer_ViewModel : INotifyPropertyChanged
         {
-            count++;
 
-            if (count == 1)
-                CounterBtn.Text = $"Clicked {count} time";
-            else
-                CounterBtn.Text = $"Clicked {count} times";
+            public ObservableCollection<int> Items { get; set; }
 
-            SemanticScreenReader.Announce(CounterBtn.Text);
+            public Vizualizer_ViewModel()
+            {
+                Items = new ObservableCollection<int>();
+                for (int i=1;i<101;i++)
+                {
+                    Items.Add(i);
+                }
+
+
+            }
+
+            public event PropertyChangedEventHandler? PropertyChanged;
+            protected virtual void OnPropertyChanged(string propertyName)
+            {
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            }
         }
     }
 
