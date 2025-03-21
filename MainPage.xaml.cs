@@ -116,9 +116,9 @@ namespace SortVizualizer
 
         private void pickSort(object parametr, ObservableCollection<Item> items)
         {
-            if (parametr is int SortId)
+            if (parametr is string strParam)
             {
-
+                var SortId = int.Parse(strParam);
                 switch (SortId)
                 {
                     case 1:
