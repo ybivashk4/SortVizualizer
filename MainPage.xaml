@@ -5,11 +5,16 @@
              xmlns:y="clr-namespace:SortVizualizer"
              x:DataType="y:Vizualizer_ViewModel">
     <Grid RowDefinitions="2*, 8*">
+        <Button Grid.Row="0" Text="Click" Command="{Binding PickSort}" CommandParameter="2"></Button>
         <Grid Grid.Row="1">
             <CollectionView ItemsSource="{Binding Items}" ItemsLayout="HorizontalList">
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="y:Item">
-                        <Label Text="{Binding Value}"></Label>
+                        <Grid ColumnDefinitions="1*" RowDefinitions="8*, 2*">
+                            <!--<Label Grid.Column="0" Grid.Row="1" Text="{Binding Value}"></Label>
+                            <Label Grid.Column="1" Grid.Row="1" Text="|"></Label>-->
+                            <Rectangle VerticalOptions="End" BackgroundColor="Red" Grid.Column="0" Grid.Row="0" HeightRequest="{Binding Value}" WidthRequest="10.5"></Rectangle>
+                        </Grid>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
             </CollectionView>
