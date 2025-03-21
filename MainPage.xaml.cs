@@ -23,7 +23,7 @@ namespace SortVizualizer
         public delegate void SortFunc(ref ObservableCollection<Item> data);
         public ICommand OnPickerSelectedIndexChanged { get; set; }
 
-        public static void BubleSort(ref ObservableCollection<Item> data)
+        public static void BubleSortDown(ref ObservableCollection<Item> data)
         {
             for (int i=0;i<100;i++)
             {
@@ -34,6 +34,56 @@ namespace SortVizualizer
                         (data[i], data[j]) = (data[j], data[i]);
                     }
                 }
+            }
+        }
+
+        public static void BubleSortUp(ref ObservableCollection<Item> data)
+        {
+            for (int i = 0; i < 100; i++)
+            {
+                for (int j = 0; j < 100; j++)
+                {
+                    if (data[i] < data[j])
+                    {
+                        (data[i], data[j]) = (data[j], data[i]);
+                    }
+                }
+            }
+        }
+
+        public static void InsertUp(ref ObservableCollection<Item> data)
+        {
+            for (int i = 0; i < 100; i++)
+            {
+                Item max = data[i];
+                int k = 0;
+                for (int j = 0; j < 100-i; j++)
+                {
+                    if (data[j] > max)
+                    {
+                        max = data[j];
+                        k = j;
+                    }
+                }
+                (data[100 - i - 1], data[k]) = (max, data[100 - i - 1]);
+            }
+        }
+
+        public static void InsertDown(ref ObservableCollection<Item> data)
+        {
+            for (int i = 0; i < 100; i++)
+            {
+                Item min = data[i];
+                int k = 0;
+                for (int j = 0; j < 100 - i; j++)
+                {
+                    if (data[j] < min)
+                    {
+                        min = data[j];
+                        k = j;
+                    }
+                }
+                (data[100 - i - 1], data[k]) = (min, data[100 - i - 1]);
             }
         }
 
@@ -72,9 +122,17 @@ namespace SortVizualizer
                 switch (SortId)
                 {
                     case 1:
-                        Sort(ref items, BubleSort);
+                        Sort(ref items, BubleSortUp);
                         break;
-
+                    case 2:
+                        Sort(ref items, BubleSortDown);
+                        break;
+                    case 3:
+                        Sort(ref items, InsertUp);
+                        break;
+                    case 4:
+                        Sort(ref items, InsertDown);
+                        break;
                     default:
                         break;
                 }
