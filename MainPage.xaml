@@ -4,11 +4,13 @@
              x:Class="SortVizualizer.MainPage"
              xmlns:y="clr-namespace:SortVizualizer"
              x:DataType="y:Vizualizer_ViewModel">
-    <Grid RowDefinitions="2*, 8*" ColumnDefinitions="1*, 1*, 1*, 1*">
-        <Button Grid.Row="0" Grid.Column="0" Text="BubbleUP" Command="{Binding PickSort}" CommandParameter="1"></Button>
-        <Button Grid.Row="0" Grid.Column="1" Text="BubbleDOWN" Command="{Binding PickSort}" CommandParameter="2"></Button>
-        <Button Grid.Row="0" Grid.Column="2" Text="InsertUP" Command="{Binding PickSort}" CommandParameter="3"></Button>
-        <Button Grid.Row="0" Grid.Column="3" Text="InsertDOWN" Command="{Binding PickSort}" CommandParameter="4"></Button>
+    <Grid RowDefinitions="2*, 8*">
+        <Grid ColumnDefinitions="1*, 1*, 1*, 1*">
+            <Button Grid.Row="0" Grid.Column="0" Text="BubbleUP" Command="{Binding PickSort}" CommandParameter="1"></Button>
+            <Button Grid.Row="0" Grid.Column="1" Text="BubbleDOWN" Command="{Binding PickSort}" CommandParameter="2"></Button>
+            <Button Grid.Row="0" Grid.Column="2" Text="InsertUP" Command="{Binding PickSort}" CommandParameter="3"></Button>
+            <Button Grid.Row="0" Grid.Column="3" Text="InsertDOWN" Command="{Binding PickSort}" CommandParameter="4"></Button>
+        </Grid>
         <Grid Grid.Row="1">
             <CollectionView ItemsSource="{Binding Items}" ItemsLayout="HorizontalList">
                 <CollectionView.ItemTemplate>
