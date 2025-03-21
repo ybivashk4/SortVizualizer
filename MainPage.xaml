@@ -4,34 +4,25 @@
              x:Class="SortVizualizer.MainPage"
              xmlns:y="clr-namespace:SortVizualizer"
              x:DataType="y:Vizualizer_ViewModel">
-    <StackLayout Padding="20">
-        <Label Text="Select Sort Algorithm" 
-               FontSize="24" 
-               HorizontalOptions="Center" />
-
-        <Picker Title="Sort Algorithms">
-            <Picker.ItemsSource>
-                <x:Array Type="{x:Type x:Int32}">
-                    <x:Int32>1</x:Int32>
-                    <!-- Bubble Sort -->
-                    <!-- Вы можете добавить другие алгоритмы сортировки здесь -->
-                </x:Array>
-            </Picker.ItemsSource>
-        </Picker>
-
-        <Button Text="Sort"
-                Command="{Binding PickSort}" 
-                CommandParameter="{Binding Source={x:Reference SortPicker}, Path=SelectedItem}" />
-
-        <CollectionView ItemsSource="{Binding Items}">
-            <CollectionView.ItemTemplate>
-                <DataTemplate>
-                    <Label Text="{Binding Value}" 
-                           FontSize="18" 
-                           HorizontalOptions="Center" 
-                           VerticalOptions="CenterAndExpand" />
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
-        </CollectionView>
-    </StackLayout>
+    <Grid RowDefinitions="2*, 8*">
+        <Grid ColumnDefinitions="1*, 1*, 1*, 1*">
+            <Button Grid.Row="0" Grid.Column="0" Text="BubbleUP" Command="{Binding PickSort}" CommandParameter="1"></Button>
+            <Button Grid.Row="0" Grid.Column="1" Text="BubbleDOWN" Command="{Binding PickSort}" CommandParameter="2"></Button>
+            <Button Grid.Row="0" Grid.Column="2" Text="InsertUP" Command="{Binding PickSort}" CommandParameter="3"></Button>
+            <Button Grid.Row="0" Grid.Column="3" Text="InsertDOWN" Command="{Binding PickSort}" CommandParameter="4"></Button>
+        </Grid>
+        <Grid Grid.Row="1">
+            <CollectionView ItemsSource="{Binding Items}" ItemsLayout="HorizontalList">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="y:Item">
+                        <Grid ColumnDefinitions="1*" RowDefinitions="8*, 2*">
+                            <!--<Label Grid.Column="0" Grid.Row="1" Text="{Binding Value}"></Label>
+                            <Label Grid.Column="1" Grid.Row="1" Text="|"></Label>-->
+                            <Rectangle VerticalOptions="End" BackgroundColor="Red" Grid.Column="0" Grid.Row="0" HeightRequest="{Binding Value}" WidthRequest="10.5"></Rectangle>
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </Grid>
+    </Grid>
 </ContentPage>

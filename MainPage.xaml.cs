@@ -56,10 +56,10 @@ namespace SortVizualizer
             for (int i = 0; i < 100; i++)
             {
                 Item max = data[i];
-                int k = 0;
+                int k = i;
                 for (int j = 0; j < 100-i; j++)
                 {
-                    if (data[j] > max)
+                    if (data[j] < max)
                     {
                         max = data[j];
                         k = j;
@@ -74,10 +74,10 @@ namespace SortVizualizer
             for (int i = 0; i < 100; i++)
             {
                 Item min = data[i];
-                int k = 0;
+                int k = i;
                 for (int j = 0; j < 100 - i; j++)
                 {
-                    if (data[j] < min)
+                    if (data[j] > min)
                     {
                         min = data[j];
                         k = j;
