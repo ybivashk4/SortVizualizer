@@ -20,10 +20,10 @@ namespace SortVizualizer
     public class Vizualizer_ViewModel : INotifyPropertyChanged
     {
         public ICommand PickSort { get; set; }
-        public delegate void SortFunc(ref ObservableCollection<Item> data);
+        public delegate Task SortFunc(ObservableCollection<Item> data);
         public ICommand OnPickerSelectedIndexChanged { get; set; }
 
-        public static void BubleSortDown(ref ObservableCollection<Item> data)
+        public async Task BubleSortDown(ObservableCollection<Item> data)
         {
             for (int i=0;i<100;i++)
             {
@@ -32,12 +32,14 @@ namespace SortVizualizer
                     if (data[i] > data[j])
                     {
                         (data[i], data[j]) = (data[j], data[i]);
+                        OnPropertyChanged(nameof(Items));
+                        await Task.Delay(10);
                     }
                 }
             }
         }
 
-        public static void BubleSortUp(ref ObservableCollection<Item> data)
+        public async Task BubleSortUp(ObservableCollection<Item> data)
         {
             for (int i = 0; i < 100; i++)
             {
@@ -46,12 +48,14 @@ namespace SortVizualizer
                     if (data[i] < data[j])
                     {
                         (data[i], data[j]) = (data[j], data[i]);
+                        OnPropertyChanged(nameof(Items));
+                        await Task.Delay(10);
                     }
                 }
             }
         }
 
-        public static void InsertUp(ref ObservableCollection<Item> data)
+        public async Task InsertUp( ObservableCollection<Item> data)
         {
             for (int i = 0; i < 100; i++)
             {
@@ -66,10 +70,12 @@ namespace SortVizualizer
                     }
                 }
                 (data[100 - i - 1], data[k]) = (max, data[100 - i - 1]);
+                OnPropertyChanged(nameof(Items));
+                await Task.Delay(50);
             }
         }
 
-        public static void InsertDown(ref ObservableCollection<Item> data)
+        public async Task InsertDown(ObservableCollection<Item> data)
         {
             for (int i = 0; i < 100; i++)
             {
@@ -84,12 +90,14 @@ namespace SortVizualizer
                     }
                 }
                 (data[100 - i - 1], data[k]) = (min, data[100 - i - 1]);
+                OnPropertyChanged(nameof(Items));
+                await Task.Delay(50);
             }
         }
 
-        public static void Sort(ref ObservableCollection<Item> data, SortFunc sortFunc)
+        public async Task Sort(ObservableCollection<Item> data, SortFunc sortFunc)
         {
-            sortFunc(ref data);
+            sortFunc(data);
         }
 
         public ObservableCollection<Item> Items { get; set; }
@@ -122,16 +130,16 @@ namespace SortVizualizer
                 switch (SortId)
                 {
                     case 1:
-                        Sort(ref items, BubleSortUp);
+                        Sort(items, BubleSortUp);
                         break;
                     case 2:
-                        Sort(ref items, BubleSortDown);
+                        Sort(items, BubleSortDown);
                         break;
                     case 3:
-                        Sort(ref items, InsertUp);
+                        Sort(items, InsertUp);
                         break;
                     case 4:
-                        Sort(ref items, InsertDown);
+                        Sort(items, InsertDown);
                         break;
                     default:
                         break;
