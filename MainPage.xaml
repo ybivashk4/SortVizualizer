@@ -28,7 +28,7 @@
                         <Grid ColumnDefinitions="1*" RowDefinitions="8*, 2*">
                             <!--<Label Grid.Column="0" Grid.Row="1" Text="{Binding Value}"></Label>
                             <Label Grid.Column="1" Grid.Row="1" Text="|"></Label>-->
-                            <Rectangle Stroke="Black" StrokeThickness="1" VerticalOptions="End" BackgroundColor="White" Grid.Column="0" Grid.Row="0" HeightRequest="{Binding Value}" WidthRequest="10.5"></Rectangle>
+                            <Rectangle Stroke="Black" StrokeThickness="1" VerticalOptions="End" BackgroundColor="{Binding Color}" Grid.Column="0" Grid.Row="0" HeightRequest="{Binding Value}" WidthRequest="10.5"></Rectangle>
                         </Grid>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
