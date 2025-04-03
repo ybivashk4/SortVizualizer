@@ -1,9 +1,9 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
-
 namespace SortVizualizer
 {
     public partial class MainPage : ContentPage
@@ -27,11 +27,11 @@ namespace SortVizualizer
         {
             for (int i=0;i<100;i++)
             {
-                for (int j=0;j<100;j++)
+                for (int j=0;j<100-1;j++)
                 {
-                    if (data[i] > data[j])
+                    if (data[j] < data[j+1])
                     {
-                        (data[i], data[j]) = (data[j], data[i]);
+                        (data[j], data[j+1]) = (data[j+1], data[j]);
                         OnPropertyChanged(nameof(Items));
                         await Task.Delay(10);
                     }
@@ -45,9 +45,9 @@ namespace SortVizualizer
             {
                 for (int j = 0; j < 100; j++)
                 {
-                    if (data[i] < data[j])
+                    if (data[j] > data[j + 1])
                     {
-                        (data[i], data[j]) = (data[j], data[i]);
+                        (data[j], data[j + 1]) = (data[j + 1], data[j]);
                         OnPropertyChanged(nameof(Items));
                         await Task.Delay(10);
                     }
@@ -106,10 +106,9 @@ namespace SortVizualizer
         {
             PickSort = new Command<object>(pickSort);
             Items = new ObservableCollection<Item>();
-            OnPickerSelectedIndexChanged = new Command<int>(onPickerSelectedIndexChanged);
             for (int i = 1; i < 101; i++)
             {
-                Items.Add(new Item(i));
+                Items.Add(new Item(i*3));
             }
 
 
@@ -117,12 +116,12 @@ namespace SortVizualizer
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        private void pickSort(object parametr)
+        private async void pickSort(object parametr)
         {
-            pickSort(parametr, Items);
+            await pickSort(parametr, Items);
         }
 
-        private void pickSort(object parametr, ObservableCollection<Item> items)
+        private async Task pickSort(object parametr, ObservableCollection<Item> items)
         {
             if (parametr is string strParam)
             {
@@ -130,16 +129,16 @@ namespace SortVizualizer
                 switch (SortId)
                 {
                     case 1:
-                        Sort(items, BubleSortUp);
+                        await Sort(items, BubleSortUp);
                         break;
                     case 2:
-                        Sort(items, BubleSortDown);
+                        await Sort(items, BubleSortDown);
                         break;
                     case 3:
-                        Sort(items, InsertUp);
+                        await Sort(items, InsertUp);
                         break;
                     case 4:
-                        Sort(items, InsertDown);
+                        await Sort(items, InsertDown);
                         break;
                     default:
                         break;
@@ -147,11 +146,6 @@ namespace SortVizualizer
             }
         }
 
-        // Нейро-код
-        private void onPickerSelectedIndexChanged(int selectedIndex)
-        {
-            
-        }
 
 
         protected virtual void OnPropertyChanged(string propertyName)
