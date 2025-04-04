@@ -156,7 +156,7 @@ namespace SortVizualizer
     public class Item : BindableObject
     {
         private int _value;
-        
+        private String _color;
         public Item(int i) { Value = i; }
         public static bool operator >(Item item1, Item item2)
         {
@@ -176,6 +176,18 @@ namespace SortVizualizer
                 if (_value != value)
                 {
                     _value = value;
+                    OnPropertyChanged(); // Уведомляем об изменении
+                }
+            }
+        }
+        public String Color
+        {
+            get => _color;
+            set
+            {
+                if (_color != value)
+                {
+                    _color = value;
                     OnPropertyChanged(); // Уведомляем об изменении
                 }
             }
