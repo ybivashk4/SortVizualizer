@@ -1,6 +1,5 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
@@ -21,24 +20,36 @@ namespace SortVizualizer
     public class Vizualizer_ViewModel : INotifyPropertyChanged
     {
         public ICommand PickSort { get; set; }
-        public delegate void SortFunc(ref ObservableCollection<Item> data);
+        public delegate Task SortFunc(ObservableCollection<Item> data);
         public ICommand OnPickerSelectedIndexChanged { get; set; }
 
-        public static void BubleSortDown(ref ObservableCollection<Item> data)
+        public async Task ChangeColor(string color, int j, ObservableCollection<Item> data)
+        {
+            data[j].Color = color;
+            OnPropertyChanged(nameof(Items));
+            await Task.Delay(10);
+        }
+        public async Task BubleSortDown(ObservableCollection<Item> data)
         {
             for (int i = 0; i < 100; i++)
             {
-                for (int j = 0; j < 100; j++)
+                for (int j = 0; j < 99; j++)
                 {
-                    if (data[i] > data[j])
+                    await ChangeColor("Red", j, data);
+                    await ChangeColor("Red", j + 1, data);
+                    if (data[j] < data[j + 1])
                     {
-                        (data[i], data[j]) = (data[j], data[i]);
+                        (data[j], data[j + 1]) = (data[j + 1], data[j]);
+                        OnPropertyChanged(nameof(Items));
+                        await Task.Delay(25);
                     }
+                    await ChangeColor("White", j, data);
+                    await ChangeColor("White", j + 1, data);
                 }
             }
         }
 
-        public static void BubleSortUp(ref ObservableCollection<Item> data)
+        public async Task BubleSortUp(ObservableCollection<Item> data)
         {
             for (int i = 0; i < 100; i++)
             {
@@ -47,50 +58,56 @@ namespace SortVizualizer
                     if (data[i] < data[j])
                     {
                         (data[i], data[j]) = (data[j], data[i]);
+                        OnPropertyChanged(nameof(Items));
+                        await Task.Delay(10);
                     }
                 }
             }
         }
 
-        public static void InsertUp(ref ObservableCollection<Item> data)
+        public async Task InsertUp(ObservableCollection<Item> data)
         {
             for (int i = 0; i < 100; i++)
             {
                 Item max = data[i];
-                int k = 0;
+                int k = i;
                 for (int j = 0; j < 100 - i; j++)
                 {
-                    if (data[j] > max)
+                    if (data[j] < max)
                     {
                         max = data[j];
                         k = j;
                     }
                 }
                 (data[100 - i - 1], data[k]) = (max, data[100 - i - 1]);
+                OnPropertyChanged(nameof(Items));
+                await Task.Delay(50);
             }
         }
 
-        public static void InsertDown(ref ObservableCollection<Item> data)
+        public async Task InsertDown(ObservableCollection<Item> data)
         {
             for (int i = 0; i < 100; i++)
             {
                 Item min = data[i];
-                int k = 0;
+                int k = i;
                 for (int j = 0; j < 100 - i; j++)
                 {
-                    if (data[j] < min)
+                    if (data[j] > min)
                     {
                         min = data[j];
                         k = j;
                     }
                 }
                 (data[100 - i - 1], data[k]) = (min, data[100 - i - 1]);
+                OnPropertyChanged(nameof(Items));
+                await Task.Delay(50);
             }
         }
 
-        public static void Sort(ref ObservableCollection<Item> data, SortFunc sortFunc)
+        public async Task Sort(ObservableCollection<Item> data, SortFunc sortFunc)
         {
-            sortFunc(ref data);
+            sortFunc(data);
         }
 
         public ObservableCollection<Item> Items { get; set; }
@@ -102,7 +119,7 @@ namespace SortVizualizer
             OnPickerSelectedIndexChanged = new Command<int>(onPickerSelectedIndexChanged);
             for (int i = 1; i < 101; i++)
             {
-                Items.Add(new Item(i));
+                Items.Add(new Item(i * 3));
             }
 
 
@@ -123,16 +140,16 @@ namespace SortVizualizer
                 switch (SortId)
                 {
                     case 1:
-                        Sort(ref items, BubleSortUp);
+                        Sort(items, BubleSortUp);
                         break;
                     case 2:
-                        Sort(ref items, BubleSortDown);
+                        Sort(items, BubleSortDown);
                         break;
                     case 3:
-                        Sort(ref items, InsertUp);
+                        Sort(items, InsertUp);
                         break;
                     case 4:
-                        Sort(ref items, InsertDown);
+                        Sort(items, InsertDown);
                         break;
                     default:
                         break;
@@ -155,8 +172,9 @@ namespace SortVizualizer
     public class Item : BindableObject
     {
         private int _value;
+        private string _color;
 
-        public Item(int i) { Value = i; }
+        public Item(int i) { Value = i; Color = "White"; }
         public static bool operator >(Item item1, Item item2)
         {
             return item1.Value > item2.Value;
@@ -180,5 +198,17 @@ namespace SortVizualizer
             }
         }
 
+        public string Color
+        {
+            get => _color;
+            set
+            {
+                if (_color != value)
+                {
+                    _color = value;
+                    //OnPropertyChanged();
+                }
+            }
+        }
     }
 }

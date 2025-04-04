@@ -4,21 +4,31 @@
              x:Class="SortVizualizer.MainPage"
              xmlns:y="clr-namespace:SortVizualizer"
              x:DataType="y:Vizualizer_ViewModel">
-    <Grid RowDefinitions="2*, 8*">
-        <Grid ColumnDefinitions="1*, 1*, 1*, 1*">
-            <Button Grid.Row="0" Grid.Column="0" Text="BubbleUP" Command="{Binding PickSort}" CommandParameter="1"></Button>
-            <Button Grid.Row="0" Grid.Column="1" Text="BubbleDOWN" Command="{Binding PickSort}" CommandParameter="2"></Button>
-            <Button Grid.Row="0" Grid.Column="2" Text="InsertUP" Command="{Binding PickSort}" CommandParameter="3"></Button>
-            <Button Grid.Row="0" Grid.Column="3" Text="InsertDOWN" Command="{Binding PickSort}" CommandParameter="4"></Button>
+    <Grid RowDefinitions="2*, 8*" BackgroundColor="#1F1F1F">
+        <Grid ColumnDefinitions="1*, 1*, 1*">
+            <Grid RowDefinitions="1*, 1*, 1*" Grid.Column="0" RadioButtonGroup.SelectedValue="1">
+                <RadioButton x:Name="Bubble" Grid.Row="0" Content="Сортировка пузырьком" IsChecked="True"></RadioButton>
+                <RadioButton x:Name="Insert" Grid.Row="1" Content="Сортировка вставками"></RadioButton>
+            </Grid>
+            <Grid Grid.Column="1" RowDefinitions="1*, 1*, 1*" RadioButtonGroup.SelectedValue="
+                 ">
+                <RadioButton x:Name="Up" Grid.Row="0" Content="В порядке возрастания" IsChecked="True"></RadioButton>
+                <RadioButton x:Name="Down" Grid.Row="1" Content="В порядке убывания"></RadioButton>
+            </Grid>
+            <Grid Grid.Column="2" RowDefinitions="1*, 1*" ColumnDefinitions="1*, 1*, 1*">
+                <Button Grid.Row="0" Grid.Column="1" Text="Click" Command="{Binding PickSort}" CommandParameter="2"></Button>
+            </Grid>
+            <!--<Button Grid.Row="0" Grid.Column="2" Text="InsertUP" Command="{Binding PickSort}" CommandParameter="3"></Button>
+            <Button Grid.Row="0" Grid.Column="3" Text="InsertDOWN" Command="{Binding PickSort}" CommandParameter="4"></Button>-->
         </Grid>
-        <Grid Grid.Row="1">
+        <Grid Grid.Row="1" HorizontalOptions="Center">
             <CollectionView ItemsSource="{Binding Items}" ItemsLayout="HorizontalList">
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="y:Item">
                         <Grid ColumnDefinitions="1*" RowDefinitions="8*, 2*">
                             <!--<Label Grid.Column="0" Grid.Row="1" Text="{Binding Value}"></Label>
                             <Label Grid.Column="1" Grid.Row="1" Text="|"></Label>-->
-                            <Rectangle VerticalOptions="End" BackgroundColor="Red" Grid.Column="0" Grid.Row="0" HeightRequest="{Binding Value}" WidthRequest="10.5"></Rectangle>
+                            <Rectangle Stroke="Black" StrokeThickness="1" VerticalOptions="End" BackgroundColor="{Binding Color}" Grid.Column="0" Grid.Row="0" HeightRequest="{Binding Value}" WidthRequest="10.5"></Rectangle>
                         </Grid>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
