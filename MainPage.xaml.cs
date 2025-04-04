@@ -27,6 +27,7 @@ namespace SortVizualizer
         {
             for (int i=0;i<100;i++)
             {
+                data[i].Color = "Red";
                 for (int j=0;j<100-1;j++)
                 {
                     if (data[j] < data[j+1])
@@ -34,6 +35,7 @@ namespace SortVizualizer
                         (data[j], data[j+1]) = (data[j+1], data[j]);
                         OnPropertyChanged(nameof(Items));
                         await Task.Delay(10);
+                        data[i].Color = "Blue";
                     }
                 }
             }
@@ -156,8 +158,9 @@ namespace SortVizualizer
     public class Item : BindableObject
     {
         private int _value;
-        private String _color;
-        public Item(int i) { Value = i; }
+        private string _color;
+
+        public Item(int i) { Value = i; Color = "Green"; }
         public static bool operator >(Item item1, Item item2)
         {
             return item1.Value > item2.Value;
@@ -180,7 +183,8 @@ namespace SortVizualizer
                 }
             }
         }
-        public String Color
+
+        public string Color
         {
             get => _color;
             set
@@ -188,10 +192,9 @@ namespace SortVizualizer
                 if (_color != value)
                 {
                     _color = value;
-                    OnPropertyChanged(); // Уведомляем об изменении
+                    OnPropertyChanged();
                 }
             }
         }
-
     }
 }
