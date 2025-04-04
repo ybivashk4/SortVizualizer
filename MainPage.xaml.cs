@@ -23,28 +23,20 @@ namespace SortVizualizer
         public delegate Task SortFunc(ObservableCollection<Item> data);
         public ICommand OnPickerSelectedIndexChanged { get; set; }
 
-        public async Task ChangeColor(string  color, int j, ObservableCollection<Item> data)
-        {
-            data[j].Color = color;
-            OnPropertyChanged(nameof(Items));
-            await Task.Delay(10);
-        }
         public async Task BubleSortDown(ObservableCollection<Item> data)
         {
             for (int i=0;i<100;i++)
             {
-                for (int j=0;j<99;j++)
+                data[i].Color = "Red";
+                for (int j=0;j<100;j++)
                 {
-                    await ChangeColor("Red", j, data);
-                    await ChangeColor("Red", j+1, data);
-                    if (data[j] < data[j+1])
+                    if (data[i] > data[j])
                     {
-                        (data[j], data[j+1]) = (data[j+1], data[j]);
+                        (data[i], data[j]) = (data[j], data[i]);
                         OnPropertyChanged(nameof(Items));
-                        await Task.Delay(25);
+                        await Task.Delay(10);
+                        data[i].Color = "Blue";
                     }
-                    await ChangeColor("White", j, data);
-                    await ChangeColor("White", j + 1, data);
                 }
             }
         }
@@ -174,7 +166,7 @@ namespace SortVizualizer
         private int _value;
         private string _color;
 
-        public Item(int i) { Value = i; Color = "White"; }
+        public Item(int i) { Value = i; Color = "Green"; }
         public static bool operator >(Item item1, Item item2)
         {
             return item1.Value > item2.Value;
@@ -206,7 +198,7 @@ namespace SortVizualizer
                 if (_color != value)
                 {
                     _color = value;
-                    //OnPropertyChanged();
+                    OnPropertyChanged();
                 }
             }
         }
