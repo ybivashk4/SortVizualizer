@@ -1,9 +1,5 @@
-﻿using Microsoft.Maui.ApplicationModel;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Diagnostics;
-using System.Diagnostics.Metrics;
-using System.Runtime.CompilerServices;
 using System.Windows.Input;
 namespace SortVizualizer
 {
@@ -18,6 +14,12 @@ namespace SortVizualizer
 
         
     }
+    /**
+     * TODO:
+     * quickSort
+     * mergeSort
+     * 
+     */
     public partial class VizualizerViewModel : INotifyPropertyChanged
     {
         private static readonly int min_speed = 2;
@@ -283,9 +285,49 @@ namespace SortVizualizer
             }
         }
 
+        public async Task InsertSortUp(ObservableCollection<Item> data)
+        {
+            for (int i=1;i<Size;i++)
+            {
+                int j = i - 1;
+                Item key = data[i];
+                while (j >= 0 && data[j] > key)
+                {
+                    data[j + 1].Color = "Red";
+                    data[j].Color = "Red";
+                    data[j + 1] = data[j];
+                    OnPropertyChanged(nameof(data));
+                    await Task.Delay(Speed);
+                    j -= 1;
+                }
+                data[j + 1] = key;
+                OnPropertyChanged(nameof(data));
+                await Task.Delay(Speed);
+            }
+        }
+
+        public async Task InsertSortDown(ObservableCollection<Item> data)
+        {
+            for (int i = 1; i < Size; i++)
+            {
+                int j = i - 1;
+                Item key = data[i];
+                while (j >= 0 && data[j] < key)
+                {
+                    data[j + 1].Color = "Red";
+                    data[j].Color = "Red";
+                    data[j + 1] = data[j];
+                    OnPropertyChanged(nameof(data));
+                    await Task.Delay(Speed);
+                    j -= 1;
+                }
+                data[j + 1] = key;
+                OnPropertyChanged(nameof(data));
+                await Task.Delay(Speed);
+            }
+        }
 
 
-        
 
         public static async Task Sort(ObservableCollection<Item> data, SortFunc sortFunc)
         {
@@ -337,6 +379,12 @@ namespace SortVizualizer
                         break;
                     case 6:
                         await Sort(items, HeapSortUp);
+                        break;
+                    case 7:
+                        await Sort(items, InsertSortDown);
+                        break;
+                    case 8:
+                        await Sort(items, InsertSortUp);
                         break;
                     default:
                         break;
