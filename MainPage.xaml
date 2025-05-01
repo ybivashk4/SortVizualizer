@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="SortVizualizer.MainPage"
              xmlns:y="clr-namespace:SortVizualizer"
-             x:DataType="y:Vizualizer_ViewModel">
+             x:DataType="y:VizualizerViewModel">
     <Grid RowDefinitions="2*, 8*">
         <Grid ColumnDefinitions="1*, 1*, 1*">
             <Grid RowDefinitions="1*, 1*, 1*" Grid.Column="0" RadioButtonGroup.SelectedValue="1">
@@ -16,7 +16,7 @@
                 <RadioButton x:Name="Down" Grid.Row="1" Content="В порядке убывания"></RadioButton>
             </Grid>
             <Grid Grid.Column="2" RowDefinitions="1*, 1*" ColumnDefinitions="1*, 1*, 1*">
-                <Button Grid.Row="0" Grid.Column="1" Text="Click" Command="{Binding PickSort}" CommandParameter="2"></Button>
+                <Button Grid.Row="0" Grid.Column="1" Text="Click" Command="{Binding PickSort}" CommandParameter="4"></Button>
             </Grid>
             <!--<Button Grid.Row="0" Grid.Column="2" Text="InsertUP" Command="{Binding PickSort}" CommandParameter="3"></Button>
             <Button Grid.Row="0" Grid.Column="3" Text="InsertDOWN" Command="{Binding PickSort}" CommandParameter="4"></Button>-->

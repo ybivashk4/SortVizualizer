@@ -13,70 +13,184 @@ namespace SortVizualizer
         public MainPage()
         {
             InitializeComponent();
-            BindingContext = new Vizualizer_ViewModel();
+            BindingContext = new VizualizerViewModel();
         }
 
         
     }
-    public class Vizualizer_ViewModel : INotifyPropertyChanged
+    public partial class VizualizerViewModel : INotifyPropertyChanged
     {
-        private static int n = 100;
+        private static readonly int min_speed = 2;
+        private int _size = 100;
+        private int _speed = 2;
+        public int Size
+        {
+            get { return _size; }
+            set
+            {
+                if (_size != value && value > 1 && value <= 100)
+                {
+                    _size = value;
+                }
+            }
+        }
+
+        public int Speed
+        {
+            get { return _speed; }
+            set
+            {
+                if (value >= 1 || value <= 6 )
+                {
+                    switch (value)
+                    {
+                        case 1:
+                            _speed = min_speed;
+                            break;
+                        case 2:
+                            _speed = min_speed*5;
+                            break;
+                        case 3:
+                            _speed = min_speed*5*5;
+                            break;
+                        case 4:
+                            _speed = min_speed*5*5*5;
+                            break;
+                        case 5:
+                            _speed = min_speed*5*5*5*5;
+                            break;
+                        case 6:
+                            _speed = min_speed*5*5*5*5*5;
+                            break;
+                    }
+                }
+            }
+        }
+
         public ICommand PickSort { get; set; }
         public delegate Task SortFunc(ObservableCollection<Item> data);
-        public ICommand OnPickerSelectedIndexChanged { get; set; }
 
         public async Task BubleSortDown(ObservableCollection<Item> data)
         {
-            for (int i=0;i<n;i++)
+            for (int i=0;i< Size; i++)
             {
-                for (int j=0;j<n-1-i;j++)
+                for (int j=0;j< Size - 1-i;j++)
                 {
                     
                     if (data[j] < data[j+1])
                     {
                         data[j].Color = "Red";
                         data[j+1].Color = "Red";
-                        Item.swap(data[j], data[j]);
-                        Item.swap(data[j + 1], data[j + 1]);
-                        await Task.Delay(10);
+                        Item.Swap(data[j], data[j]);
+                        Item.Swap(data[j + 1], data[j + 1]);
                         OnPropertyChanged(nameof(Items));
-                        Item.swap(data[j], data[j + 1]);
-                        await Task.Delay(10);
+                        Item.Swap(data[j], data[j + 1]);
+                        await Task.Delay(Speed);
                         OnPropertyChanged(nameof(Items));
                     }
                     data[j].Color = "Green";
                     data[j+1].Color = "Green";
-                    Item temp1 = new Item(data[j].Value);
-                    data[j] = temp1.assign(data[j]);
-                    Item temp2 = new Item(data[j+1].Value);
-                    data[j + 1] = temp2.assign(data[j + 1]);
+                    Item temp1 = new (data[j].Value);
+                    data[j] = temp1.Assign(data[j]);
+                    Item temp2 = new (data[j+1].Value);
+                    data[j + 1] = temp2.Assign(data[j + 1]);
 
                 }
-                data[n - 1 - i].Color = "Blue";
-                Item temp = new Item(data[n - 1 - i].Value);
-                data[n - 1 - i] = temp.assign(data[n - 1 - i]);
-                await Task.Delay(10);
+                data[Size - 1 - i].Color = "Blue";
+                Item temp = new (data[Size - 1 - i].Value);
+                data[Size - 1 - i] = temp.Assign(data[Size - 1 - i]);
                 OnPropertyChanged(nameof(Items));
             }
         }
 
         public async Task BubleSortUp(ObservableCollection<Item> data)
         {
-            for (int i = 0; i < n; i++)
+            for (int i = 0; i < Size; i++)
             {
-                for (int j = 0; j < n; j++)
+                for (int j = 0; j < Size - 1 - i; j++)
                 {
+
                     if (data[j] > data[j + 1])
                     {
-                        (data[j], data[j + 1]) = (data[j + 1], data[j]);
+                        data[j].Color = "Red";
+                        data[j + 1].Color = "Red";
+                        Item.Swap(data[j], data[j]);
+                        Item.Swap(data[j + 1], data[j + 1]);
                         OnPropertyChanged(nameof(Items));
-                        await Task.Delay(10);
+                        Item.Swap(data[j], data[j + 1]);
+                        await Task.Delay(Speed);
+                        OnPropertyChanged(nameof(Items));
                     }
+                    data[j].Color = "Green";
+                    data[j + 1].Color = "Green";
+                    Item temp1 = new (data[j].Value);
+                    data[j] = temp1.Assign(data[j]);
+                    Item temp2 = new (data[j + 1].Value);
+                    data[j + 1] = temp2.Assign(data[j + 1]);
+
                 }
+                data[Size - 1 - i].Color = "Blue";
+                Item temp = new (data[Size - 1 - i].Value);
+                data[Size - 1 - i] = temp.Assign(data[Size - 1 - i]);
+                OnPropertyChanged(nameof(Items));
             }
         }
 
-        public async Task heapifyDown(ObservableCollection<Item> data, int cur_n, int i)
+        public async Task SelectionUp(ObservableCollection<Item> data)
+        {
+            for (int i = 0; i < Size; i++)
+            {
+                int min_index = i;
+                for (int j = i; j < Size; j++)
+                {
+                    data[i].Color = "Red";
+                    data[j].Color = "Red";
+                    (data[i], data[j]) = (data[j], data[i]);
+                    (data[i], data[j]) = (data[j], data[i]);
+                    OnPropertyChanged(nameof(data));
+                    await Task.Delay(Speed);
+                    if (data[j] < data[i])
+                    {
+                        min_index = j;
+                    }
+                    data[j].Color = "Green";
+                    data[j].Color = "Green";
+                }
+                (data[i], data[min_index]) = (data[min_index], data[i]);
+                data[i].Color = "Blue";
+                OnPropertyChanged(nameof(Items));
+                await Task.Delay(Speed);
+            }
+        }
+
+        public async Task SelectionDown(ObservableCollection<Item> data)
+        {
+            for (int i = 0; i < Size; i++)
+            {
+                int max_index = i;
+                for (int j = i; j < Size; j++)
+                {
+                    data[i].Color = "Red";
+                    data[j].Color = "Red";
+                    (data[i], data[j]) = (data[j], data[i]);
+                    (data[i], data[j]) = (data[j], data[i]);
+                    OnPropertyChanged(nameof(data));
+                    await Task.Delay(Speed);
+                    if (data[j] > data[i])
+                    {
+                        max_index = j;
+                    }
+                    data[j].Color = "Green";
+                    data[j].Color = "Green";
+                }
+                (data[i], data[max_index]) = (data[max_index], data[i]);
+                data[i].Color = "Blue";
+                OnPropertyChanged(nameof(Items));
+                await Task.Delay(Speed);
+            }
+        }
+
+        private async Task HeapifyDown(ObservableCollection<Item> data, int cur_n, int i)
         {
             int largest = i;
             data[i].Color = "Red";
@@ -98,8 +212,8 @@ namespace SortVizualizer
             {
                 (data[largest], data[i]) = (data[i], data[largest]);
                 OnPropertyChanged(nameof(Items));
-                await Task.Delay(100);
-                await heapifyDown(data, cur_n, largest);
+                await Task.Delay(Speed);
+                await HeapifyDown(data, cur_n, largest);
                 data[largest].Color = "Green";
                 data[i].Color = "Green";
             }
@@ -107,11 +221,11 @@ namespace SortVizualizer
 
         public async Task HeapSortDown(ObservableCollection<Item> data)
         {
-            int cur_n = n;
+            int cur_n = Size;
             while (cur_n > 0)
             {
                 for (int i = cur_n / 2 - 1; i >= 0; i--)
-                    await heapifyDown(data, cur_n, i);
+                    await HeapifyDown(data, cur_n, i);
                 Item item = data[0];
                 item.Color = "Blue";
                 data.Remove(data[0]);
@@ -123,7 +237,7 @@ namespace SortVizualizer
         }
 
 
-        public async Task heapifyUp(ObservableCollection<Item> data, int cur_n, int i)
+        private async Task HeapifyUp(ObservableCollection<Item> data, int cur_n, int i)
         {
             int smallest = i;
             data[i].Color = "Red";
@@ -145,8 +259,8 @@ namespace SortVizualizer
             {
                 (data[smallest], data[i]) = (data[i], data[smallest]);
                 OnPropertyChanged(nameof(Items));
-                await Task.Delay(100);
-                await heapifyUp(data, cur_n, smallest);
+                await Task.Delay(Speed);
+                await HeapifyUp(data, cur_n, smallest);
                 data[smallest].Color = "Green";
                 data[i].Color = "Green";
             }
@@ -154,11 +268,11 @@ namespace SortVizualizer
 
         public async Task HeapSortUp(ObservableCollection<Item> data)
         {
-            int cur_n = n;
+            int cur_n = Size;
             while (cur_n > 0)
             {
                 for (int i = cur_n / 2 - 1; i >= 0; i--)
-                    await heapifyUp(data, cur_n, i);
+                    await HeapifyUp(data, cur_n, i);
                 Item item = data[0];
                 item.Color = "Blue";
                 data.Remove(data[0]);
@@ -171,58 +285,20 @@ namespace SortVizualizer
 
 
 
-        public async Task InsertUp( ObservableCollection<Item> data)
-        {
-            for (int i = 0; i < n; i++)
-            {
-                Item max = data[i];
-                int k = i;
-                for (int j = 0; j < n-i; j++)
-                {
-                    if (data[j] < max)
-                    {
-                        max = data[j];
-                        k = j;
-                    }
-                }
-                (data[n - i - 1], data[k]) = (max, data[n - i - 1]);
-                OnPropertyChanged(nameof(Items));
-                await Task.Delay(50);
-            }
-        }
+        
 
-        public async Task InsertDown(ObservableCollection<Item> data)
+        public static async Task Sort(ObservableCollection<Item> data, SortFunc sortFunc)
         {
-            for (int i = 0; i < n; i++)
-            {
-                Item min = data[i];
-                int k = i;
-                for (int j = 0; j < n - i; j++)
-                {
-                    if (data[j] > min)
-                    {
-                        min = data[j];
-                        k = j;
-                    }
-                }
-                (data[n - i - 1], data[k]) = (min, data[n - i - 1]);
-                OnPropertyChanged(nameof(Items));
-                await Task.Delay(50);
-            }
-        }
-
-        public async Task Sort(ObservableCollection<Item> data, SortFunc sortFunc)
-        {
-            sortFunc(data);
+            await sortFunc(data);
         }
 
         public ObservableCollection<Item> Items { get; set; }
 
-        public Vizualizer_ViewModel()
+        public VizualizerViewModel()
         {
-            PickSort = new Command<object>(pickSort);
-            Items = new ObservableCollection<Item>();
-            for (int i = 1; i < n+1; i++)
+            PickSort = new Command<object>(PickSortFunc);
+            Items = [];
+            for (int i = 1; i < Size +1; i++)
             {
                 Items.Add(new Item(i*3));
             }
@@ -232,12 +308,12 @@ namespace SortVizualizer
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        private async void pickSort(object parametr)
+        private async void PickSortFunc(object parametr)
         {
-            await pickSort(parametr, Items);
+            await PickSortFunc(parametr, Items);
         }
 
-        private async Task pickSort(object parametr, ObservableCollection<Item> items)
+        private async Task PickSortFunc(object parametr, ObservableCollection<Item> items)
         {
             if (parametr is string strParam)
             {
@@ -251,10 +327,10 @@ namespace SortVizualizer
                         await Sort(items, BubleSortDown);
                         break;
                     case 3:
-                        await Sort(items, InsertUp);
+                        await Sort(items, SelectionUp);
                         break;
                     case 4:
-                        await Sort(items, InsertDown);
+                        await Sort(items, SelectionDown);
                         break;
                     case 5:
                         await Sort(items, HeapSortDown);
@@ -274,8 +350,24 @@ namespace SortVizualizer
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
+
+        public override bool Equals(object? obj)
+        {
+            return obj is VizualizerViewModel model &&
+                   _size == model._size &&
+                   _speed == model._speed &&
+                   Size == model.Size &&
+                   Speed == model.Speed &&
+                   EqualityComparer<ICommand>.Default.Equals(PickSort, model.PickSort) &&
+                   EqualityComparer<ObservableCollection<Item>>.Default.Equals(Items, model.Items);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(_size, _speed, Size, Speed, PickSort, Items);
+        }
     }
-    public class Item : BindableObject
+    public partial class Item : BindableObject
     {
         private int _value;
         private string _color = "";
@@ -291,19 +383,19 @@ namespace SortVizualizer
             return item1.Value < item2.Value;
         }
 
-       public Item assign(Item item)
+       public Item Assign(Item item)
         {
             Color = item.Color;
             Value = item.Value;
             return this;
         }
 
-        public static void swap(Item item1, Item item2)
+        public static void Swap(Item item1, Item item2)
         {
-            Item temp = new Item(item1.Value);
-            temp.assign(item1);
-            item1.assign(item2);
-            item2.assign(temp);
+            Item temp = new (item1.Value);
+            temp.Assign(item1);
+            item1.Assign(item2);
+            item2.Assign(temp);
         }
 
         public int Value 
