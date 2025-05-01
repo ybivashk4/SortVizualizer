@@ -70,6 +70,7 @@ namespace SortVizualizer
         }
 
         public ICommand PickSort { get; set; }
+        public ICommand ShuffleDataCommand { get; set; }
         public delegate Task SortFunc(ObservableCollection<Item> data);
 
         public async Task BubleSortDown(ObservableCollection<Item> data)
@@ -327,25 +328,327 @@ namespace SortVizualizer
             }
         }
 
+        public async Task MergeUp(ObservableCollection<Item> data, int l, int m, int r)
+        {
+            // Find sizes of two
+            // subarrays to be merged
+            int n1 = m - l + 1;
+            int n2 = r - m;
+            int i, j;
 
+            // Create temp arrays
+            ObservableCollection<Item> L = [];
+            ObservableCollection<Item> R = [];
+
+            // Copy data to temp arrays
+            for (i = 0; i < n1; ++i)
+                L.Add(data[l + i]);
+            for (j = 0; j < n2; ++j)
+                R.Add(data[m + 1 + j]);
+
+            // Merge the temp arrays
+
+            // Initial indexes of first
+            // and second subarrays
+            i = 0;
+            j = 0;
+
+            // Initial index of merged
+            // subarray array
+            int k = l;
+            while (i < n1 && j < n2)
+            {
+                if (L[i].Value <= R[j].Value)
+                {
+                    data[k] = L[i];
+                    OnPropertyChanged(nameof (data));
+                    await Task.Delay(Speed);
+                    i++;
+                }
+                else
+                {
+                    OnPropertyChanged(nameof(data));
+                    await Task.Delay(Speed);
+                    data[k] = R[j];
+                    j++;
+                }
+                k++;
+            }
+
+            // Copy remaining elements
+            // of L[] if any
+            while (i < n1)
+            {
+                data[k] = L[i];
+                OnPropertyChanged(nameof(data));
+                await Task.Delay(Speed);
+                i++;
+                k++;
+            }
+
+            // Copy remaining elements
+            // of R[] if any
+            while (j < n2)
+            {
+                data[k] = R[j];
+                OnPropertyChanged(nameof(data));
+                await Task.Delay(Speed);
+                j++;
+                k++;
+            }
+        }
+        public async Task MergeSortApiUp(ObservableCollection<Item> data, int l, int r)
+        {
+            if (l < r)
+            {
+
+                // Find the middle point
+                int m = l + (r - l) / 2;
+
+                // Sort first and second halves
+                await MergeSortApiUp(data, l, m);
+                await MergeSortApiUp(data, m + 1, r);
+
+                // Merge the sorted halves
+                await MergeUp(data, l, m, r);
+            }
+        }
+
+        public async Task MergeSortUp(ObservableCollection<Item> data)
+        {
+            await MergeSortApiUp(data, 0, Size-1);
+        }
+
+
+        public async Task MergeDown(ObservableCollection<Item> data, int l, int m, int r)
+        {
+            // Find sizes of two
+            // subarrays to be merged
+            int n1 = m - l + 1;
+            int n2 = r - m;
+            int i, j;
+
+            // Create temp arrays
+            ObservableCollection<Item> L = [];
+            ObservableCollection<Item> R = [];
+
+            // Copy data to temp arrays
+            for (i = 0; i < n1; ++i)
+                L.Add(data[l + i]);
+            for (j = 0; j < n2; ++j)
+                R.Add(data[m + 1 + j]);
+
+            // Merge the temp arrays
+
+            // Initial indexes of first
+            // and second subarrays
+            i = 0;
+            j = 0;
+
+            // Initial index of merged
+            // subarray array
+            int k = l;
+            while (i < n1 && j < n2)
+            {
+                if (L[i].Value >= R[j].Value)
+                {
+                    data[k] = L[i];
+                    OnPropertyChanged(nameof(data));
+                    await Task.Delay(Speed);
+                    i++;
+                }
+                else
+                {
+                    OnPropertyChanged(nameof(data));
+                    await Task.Delay(Speed);
+                    data[k] = R[j];
+                    j++;
+                }
+                k++;
+            }
+
+            // Copy remaining elements
+            // of L[] if any
+            while (i < n1)
+            {
+                data[k] = L[i];
+                OnPropertyChanged(nameof(data));
+                await Task.Delay(Speed);
+                i++;
+                k++;
+            }
+
+            // Copy remaining elements
+            // of R[] if any
+            while (j < n2)
+            {
+                data[k] = R[j];
+                OnPropertyChanged(nameof(data));
+                await Task.Delay(Speed);
+                j++;
+                k++;
+            }
+        }
+        public async Task MergeSortApiDown(ObservableCollection<Item> data, int l, int r)
+        {
+            if (l < r)
+            {
+
+                // Find the middle point
+                int m = l + (r - l) / 2;
+
+                // Sort first and second halves
+                await MergeSortApiDown(data, l, m);
+                await MergeSortApiDown(data, m + 1, r);
+
+                // Merge the sorted halves
+                await MergeDown(data, l, m, r);
+            }
+        }
+
+        public async Task MergeSortDown(ObservableCollection<Item> data)
+        {
+            await MergeSortApiDown(data, 0, Size - 1);
+        }
+
+        private int PartitionUp(ObservableCollection<Item> data, int low, int high)
+        {
+
+            // Choose the pivot
+            Item pivot = data[high];
+
+            // Index of smaller element and indicates 
+            // the right position of pivot found so far
+            int i = low - 1;
+
+            // Traverse arr[low..high] and move all smaller
+            // elements to the left side. Elements from low to 
+            // i are smaller after every iteration
+            for (int j = low; j <= high - 1; j++)
+            {
+                if (data[j] < pivot)
+                {
+                    i++;
+                    (data[i], data[j]) = (data[j], data[i]);
+                    data[i].Color = "Red";
+                    data[j].Color = "Red";
+                }
+            }
+
+            // Move pivot after smaller elements and
+            // return its position
+            (data[i+1], data[high]) = (data[high], data[i+1]);
+            return i + 1;
+        }
+
+        // The QuickSort function implementation
+        private async Task QuickSortApiUp(ObservableCollection<Item> data, int low, int high)
+        {
+            if (low < high)
+            {
+                // pi is the partition return index of pivot
+                int pi = PartitionUp(data, low, high);
+                OnPropertyChanged(nameof(data));
+                await Task.Delay(Speed);
+                // Recursion calls for smaller elements
+                // and greater or equals elements
+                await QuickSortApiUp(data, low, pi - 1);
+                await QuickSortApiUp(data, pi + 1, high);
+            }
+        }
+        public async Task QuickSortUp (ObservableCollection<Item> data)
+        {
+            await QuickSortApiUp(data, 0, Size - 1);
+        }
+
+        private Task<int> PartitionDown(ObservableCollection<Item> data, int low, int high)
+        {
+
+            // Choose the pivot
+            Item pivot = data[high];
+
+            // Index of smaller element and indicates 
+            // the right position of pivot found so far
+            int i = low - 1;
+
+            // Traverse arr[low..high] and move all smaller
+            // elements to the left side. Elements from low to 
+            // i are smaller after every iteration
+            for (int j = low; j <= high - 1; j++)
+            {
+                if (data[j] > pivot)
+                {
+                    i++;
+                    (data[i], data[j]) = (data[j], data[i]);
+                    data[i].Color = "Red";
+                    data[j].Color = "Red";
+                }
+            }
+
+            // Move pivot after smaller elements and
+            // return its position
+            (data[i + 1], data[high]) = (data[high], data[i + 1]);
+            return Task<int>.Factory.StartNew(() => i+1);
+        }
+
+        // The QuickSort function implementation
+        private async Task QuickSortApiDown(ObservableCollection<Item> data, int low, int high)
+        {
+            if (low < high)
+            {
+                // pi is the partition return index of pivot
+                int pi = PartitionDown(data, low, high).Result;
+                OnPropertyChanged(nameof(data));
+                
+                // Recursion calls for smaller elements
+                // and greater or equals elements
+                await QuickSortApiDown(data, low, pi - 1);
+                await QuickSortApiDown(data, pi + 1, high);
+            }
+        }
+        public async Task QuickSortDown(ObservableCollection<Item> data)
+        {
+            await QuickSortApiDown(data, 0, Size - 1);
+        }
 
         public static async Task Sort(ObservableCollection<Item> data, SortFunc sortFunc)
         {
             await sortFunc(data);
         }
+        public void Shuffle_data(object obj)
+        {
+            Shuffle_data(Items);
 
+
+        }
+        public void Shuffle_data(ObservableCollection<Item> data)
+        {
+
+            List<Item> list = new List<Item>();
+            Random random = new();
+            foreach (Item item in data)
+            {
+                list.Add(item);
+            }
+            Span<Item> span = new(list.ToArray());
+            random.Shuffle(span);
+            data.Clear();
+            foreach (var item in span)
+            {
+                data.Add(item);
+            }
+        }
         public ObservableCollection<Item> Items { get; set; }
 
         public VizualizerViewModel()
         {
             PickSort = new Command<object>(PickSortFunc);
+            ShuffleDataCommand = new Command<object>(Shuffle_data);
             Items = [];
             for (int i = 1; i < Size +1; i++)
             {
                 Items.Add(new Item(i*3));
             }
-
-
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -354,6 +657,8 @@ namespace SortVizualizer
         {
             await PickSortFunc(parametr, Items);
         }
+
+       
 
         private async Task PickSortFunc(object parametr, ObservableCollection<Item> items)
         {
@@ -385,6 +690,18 @@ namespace SortVizualizer
                         break;
                     case 8:
                         await Sort(items, InsertSortUp);
+                        break;
+                    case 9:
+                        await Sort(items, MergeSortUp);
+                        break;
+                    case 10:
+                        await Sort(items, MergeSortDown);
+                        break;
+                    case 11:
+                        await Sort(items, QuickSortUp);
+                        break;
+                    case 12:
+                        await Sort(items, QuickSortDown);
                         break;
                     default:
                         break;
