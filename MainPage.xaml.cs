@@ -65,9 +65,7 @@ namespace SortVizualizer
 
         public ICommand PickSort { get; set; }
         public ICommand ShuffleDataCommand { get; set; }
-
         public ICommand UpOrderCommand { get; set; }
-
         public ICommand DownOrderCommand {  get; set; }
 
         public delegate Task SortFunc(ObservableCollection<Item> data);
@@ -103,7 +101,7 @@ namespace SortVizualizer
                 data[Size - 1 - i] = temp.Assign(data[Size - 1 - i]);
                 OnPropertyChanged(nameof(Items));
             }
-        }
+        }   
 
         public async Task BubleSortUp(ObservableCollection<Item> data)
         {
@@ -329,31 +327,17 @@ namespace SortVizualizer
 
         public async Task MergeUp(ObservableCollection<Item> data, int l, int m, int r)
         {
-            // Find sizes of two
-            // subarrays to be merged
             int n1 = m - l + 1;
             int n2 = r - m;
             int i, j;
-
-            // Create temp arrays
             ObservableCollection<Item> L = [];
             ObservableCollection<Item> R = [];
-
-            // Copy data to temp arrays
             for (i = 0; i < n1; ++i)
                 L.Add(data[l + i]);
             for (j = 0; j < n2; ++j)
                 R.Add(data[m + 1 + j]);
-
-            // Merge the temp arrays
-
-            // Initial indexes of first
-            // and second subarrays
             i = 0;
             j = 0;
-
-            // Initial index of merged
-            // subarray array
             int k = l;
             while (i < n1 && j < n2)
             {
@@ -373,9 +357,6 @@ namespace SortVizualizer
                 }
                 k++;
             }
-
-            // Copy remaining elements
-            // of L[] if any
             while (i < n1)
             {
                 data[k] = L[i];
@@ -384,9 +365,6 @@ namespace SortVizualizer
                 i++;
                 k++;
             }
-
-            // Copy remaining elements
-            // of R[] if any
             while (j < n2)
             {
                 data[k] = R[j];
@@ -400,15 +378,9 @@ namespace SortVizualizer
         {
             if (l < r)
             {
-
-                // Find the middle point
                 int m = l + (r - l) / 2;
-
-                // Sort first and second halves
                 await MergeSortApiUp(data, l, m);
                 await MergeSortApiUp(data, m + 1, r);
-
-                // Merge the sorted halves
                 await MergeUp(data, l, m, r);
             }
         }
@@ -421,31 +393,17 @@ namespace SortVizualizer
 
         public async Task MergeDown(ObservableCollection<Item> data, int l, int m, int r)
         {
-            // Find sizes of two
-            // subarrays to be merged
             int n1 = m - l + 1;
             int n2 = r - m;
             int i, j;
-
-            // Create temp arrays
             ObservableCollection<Item> L = [];
             ObservableCollection<Item> R = [];
-
-            // Copy data to temp arrays
             for (i = 0; i < n1; ++i)
                 L.Add(data[l + i]);
             for (j = 0; j < n2; ++j)
                 R.Add(data[m + 1 + j]);
-
-            // Merge the temp arrays
-
-            // Initial indexes of first
-            // and second subarrays
             i = 0;
             j = 0;
-
-            // Initial index of merged
-            // subarray array
             int k = l;
             while (i < n1 && j < n2)
             {
@@ -465,9 +423,6 @@ namespace SortVizualizer
                 }
                 k++;
             }
-
-            // Copy remaining elements
-            // of L[] if any
             while (i < n1)
             {
                 data[k] = L[i];
@@ -476,9 +431,6 @@ namespace SortVizualizer
                 i++;
                 k++;
             }
-
-            // Copy remaining elements
-            // of R[] if any
             while (j < n2)
             {
                 data[k] = R[j];
@@ -492,15 +444,9 @@ namespace SortVizualizer
         {
             if (l < r)
             {
-
-                // Find the middle point
                 int m = l + (r - l) / 2;
-
-                // Sort first and second halves
                 await MergeSortApiDown(data, l, m);
                 await MergeSortApiDown(data, m + 1, r);
-
-                // Merge the sorted halves
                 await MergeDown(data, l, m, r);
             }
         }
@@ -513,16 +459,8 @@ namespace SortVizualizer
         private int PartitionUp(ObservableCollection<Item> data, int low, int high)
         {
 
-            // Choose the pivot
             Item pivot = data[high];
-
-            // Index of smaller element and indicates 
-            // the right position of pivot found so far
             int i = low - 1;
-
-            // Traverse arr[low..high] and move all smaller
-            // elements to the left side. Elements from low to 
-            // i are smaller after every iteration
             for (int j = low; j <= high - 1; j++)
             {
                 if (data[j] < pivot)
@@ -533,24 +471,17 @@ namespace SortVizualizer
                     data[j].Color = "Red";
                 }
             }
-
-            // Move pivot after smaller elements and
-            // return its position
             (data[i+1], data[high]) = (data[high], data[i+1]);
             return i + 1;
         }
 
-        // The QuickSort function implementation
         private async Task QuickSortApiUp(ObservableCollection<Item> data, int low, int high)
         {
             if (low < high)
             {
-                // pi is the partition return index of pivot
                 int pi = PartitionUp(data, low, high);
                 OnPropertyChanged(nameof(data));
                 await Task.Delay(Speed);
-                // Recursion calls for smaller elements
-                // and greater or equals elements
                 await QuickSortApiUp(data, low, pi - 1);
                 await QuickSortApiUp(data, pi + 1, high);
             }
@@ -563,16 +494,10 @@ namespace SortVizualizer
         private Task<int> PartitionDown(ObservableCollection<Item> data, int low, int high)
         {
 
-            // Choose the pivot
             Item pivot = data[high];
 
-            // Index of smaller element and indicates 
-            // the right position of pivot found so far
             int i = low - 1;
 
-            // Traverse arr[low..high] and move all smaller
-            // elements to the left side. Elements from low to 
-            // i are smaller after every iteration
             for (int j = low; j <= high - 1; j++)
             {
                 if (data[j] > pivot)
@@ -584,25 +509,18 @@ namespace SortVizualizer
                 }
             }
 
-            // Move pivot after smaller elements and
-            // return its position
-
             (data[i + 1], data[high]) = (data[high], data[i + 1]);
             return Task<int>.Factory.StartNew(() => i+1);
         }
 
-        // The QuickSort function implementation
         private async Task QuickSortApiDown(ObservableCollection<Item> data, int low, int high)
         {
             if (low < high)
             {
-                // pi is the partition return index of pivot
                 int pi = PartitionDown(data, low, high).Result;
                 OnPropertyChanged(nameof(data));
                 await Task.Delay(Speed);
-
-                // Recursion calls for smaller elements
-                // and greater or equals elements
+                
                 await QuickSortApiDown(data, low, pi - 1);
                 await QuickSortApiDown(data, pi + 1, high);
             }
@@ -616,11 +534,11 @@ namespace SortVizualizer
         {
             await sortFunc(data);
         }
-        public void Shuffle_data(object obj)
+        public void ShuffleData(object obj)
         {
-            Shuffle_data(Items);
+            ShuffleData(Items);
         }
-        public void Shuffle_data(ObservableCollection<Item> data)
+        public void ShuffleData(ObservableCollection<Item> data)
         {
 
             List<Item> list = new List<Item>();
@@ -665,7 +583,7 @@ namespace SortVizualizer
         public VizualizerViewModel()
         {
             PickSort = new Command<object>(PickSortFunc);
-            ShuffleDataCommand = new Command<object>(Shuffle_data);
+            ShuffleDataCommand = new Command<object>(ShuffleData);
             UpOrderCommand = new Command<object>(UpOrder);
             DownOrderCommand = new Command<object>(DownOrder);
 
@@ -682,8 +600,6 @@ namespace SortVizualizer
         {
             await PickSortFunc(parametr, Items);
         }
-
-       
 
         private async Task PickSortFunc(object parametr, ObservableCollection<Item> items)
         {
