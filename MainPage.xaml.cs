@@ -14,12 +14,6 @@ namespace SortVizualizer
 
         
     }
-    /**
-     * TODO:
-     * quickSort
-     * mergeSort
-     * 
-     */
     public partial class VizualizerViewModel : INotifyPropertyChanged
     {
         private static readonly int min_speed = 2;
@@ -71,6 +65,11 @@ namespace SortVizualizer
 
         public ICommand PickSort { get; set; }
         public ICommand ShuffleDataCommand { get; set; }
+
+        public ICommand UpOrderCommand { get; set; }
+
+        public ICommand DownOrderCommand {  get; set; }
+
         public delegate Task SortFunc(ObservableCollection<Item> data);
 
         public async Task BubleSortDown(ObservableCollection<Item> data)
@@ -587,6 +586,7 @@ namespace SortVizualizer
 
             // Move pivot after smaller elements and
             // return its position
+
             (data[i + 1], data[high]) = (data[high], data[i + 1]);
             return Task<int>.Factory.StartNew(() => i+1);
         }
@@ -599,7 +599,8 @@ namespace SortVizualizer
                 // pi is the partition return index of pivot
                 int pi = PartitionDown(data, low, high).Result;
                 OnPropertyChanged(nameof(data));
-                
+                await Task.Delay(Speed);
+
                 // Recursion calls for smaller elements
                 // and greater or equals elements
                 await QuickSortApiDown(data, low, pi - 1);
@@ -618,8 +619,6 @@ namespace SortVizualizer
         public void Shuffle_data(object obj)
         {
             Shuffle_data(Items);
-
-
         }
         public void Shuffle_data(ObservableCollection<Item> data)
         {
@@ -638,12 +637,38 @@ namespace SortVizualizer
                 data.Add(item);
             }
         }
+
+        public void DownOrder(object obj)
+        {
+            DownOrder(Items);
+        }
+        public void DownOrder(ObservableCollection<Item> data)
+        {
+            data.Clear();
+            for (int i=Size-1;i>=0;i--)
+            {
+                data.Add(new Item(i * 3));
+            }
+        }
+        public void UpOrder(object obj) { UpOrder(Items); }
+        public void UpOrder(ObservableCollection<Item> data)
+        {
+            data.Clear();
+            for (int i = 0; i < Size; i++)
+            {
+                data.Add(new Item(i * 3));
+            }
+        }
+
         public ObservableCollection<Item> Items { get; set; }
 
         public VizualizerViewModel()
         {
             PickSort = new Command<object>(PickSortFunc);
             ShuffleDataCommand = new Command<object>(Shuffle_data);
+            UpOrderCommand = new Command<object>(UpOrder);
+            DownOrderCommand = new Command<object>(DownOrder);
+
             Items = [];
             for (int i = 1; i < Size +1; i++)
             {
