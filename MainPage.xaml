@@ -1,33 +1,56 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              x:Class="SortVizualizer.MainPage"
              xmlns:y="clr-namespace:SortVizualizer"
              x:DataType="y:VizualizerViewModel">
-    <Grid RowDefinitions="2*, 8*">
-        <Grid ColumnDefinitions="1*, 1*, 1*">
-            <Grid RowDefinitions="1*, 1*, 1*" Grid.Column="0" RadioButtonGroup.SelectedValue="1">
-                <RadioButton x:Name="Bubble" Grid.Row="0" Content="Сортировка пузырьком" IsChecked="True"></RadioButton>
-                <RadioButton x:Name="Insert" Grid.Row="1" Content="Сортировка вставками"></RadioButton>
+    <Grid RowDefinitions="2*, 8*" BackgroundColor="#1F1F1F">
+        <Grid ColumnDefinitions="1*, 1*">
+            <Grid Grid.Column="0" RowDefinitions="1*, 1*" ColumnDefinitions="1*, 10*, 1*, 5*">
+                <Picker x:Name="SortPicker" Grid.Row="1" Grid.Column="1">
+                    <Picker.Items>
+                        <x:String>Пузырьком по возрастанию</x:String>
+                        <x:String>Пузырьком по убыванию</x:String>
+                        <x:String>Выборами по возрастанию</x:String>
+                        <x:String>Выборами по убыванию</x:String>
+                        <x:String>Кучей по убыванию</x:String>
+                        <x:String>Кучей по возрастанию</x:String>
+                        <x:String>Вставками по убыванию</x:String>
+                        <x:String>Вставками по возрастанию</x:String>
+                        <x:String>Слиянием по возрастанию</x:String>
+                        <x:String>Слиянием по убыванию</x:String>
+                        <x:String>Быстрая сортировка по возрастанию</x:String>
+                        <x:String>Быстрая сортировка по убыванию</x:String>
+                    </Picker.Items>
+                </Picker>
+                <Button Grid.Row="0" Grid.Column="1" Text="Сортировать" Command="{Binding PickSort}" CommandParameter="{Binding x:DataType='Picker', Source={x:Reference SortPicker}, Path=SelectedItem}"></Button>
+                <Picker x:Name="SpeedPicker" Grid.Row="1" Grid.Column="3" SelectedIndex="{Binding Speed}">
+                    <Picker.Items>
+                        <x:String>x1</x:String>
+                        <x:String>x5</x:String>
+                        <x:String>x25</x:String>
+                        <x:String>x125</x:String>
+                        <x:String>x625</x:String>
+                        <x:String>x3125</x:String>
+                    </Picker.Items>
+                </Picker>
             </Grid>
-            <Grid Grid.Column="1" RowDefinitions="1*, 1*, 1*" RadioButtonGroup.SelectedValue="
-                 ">
-                <RadioButton x:Name="Up" Grid.Row="0" Content="В порядке возрастания" IsChecked="True"></RadioButton>
-                <RadioButton x:Name="Down" Grid.Row="1" Content="В порядке убывания"></RadioButton>
+            <Grid Grid.Column="1" RowDefinitions="1*, 1*">
+                <Grid Grid.Row="0" ColumnDefinitions="1*, 1*, 1*">
+                    <Button Grid.Column="0" Text="Случайная" Command="{Binding ShuffleDataCommand}"></Button>
+                    <Button Grid.Column="1" Text="Возрастающая" Command="{Binding UpOrderCommand}"></Button>
+                    <Button Grid.Column="2" Text="Убывающая" Command="{Binding DownOrderCommand}"></Button>
+                </Grid>
+                <Entry Grid.Row="1" Text="{Binding Size}" IsReadOnly="{Binding IsSorting}">
+                </Entry>
             </Grid>
-            <Grid Grid.Column="2" RowDefinitions="1*, 1*" ColumnDefinitions="1*, 1*, 1*">
-                <Button Grid.Row="0" Grid.Column="1" Text="Click" Command="{Binding PickSort}" CommandParameter="4"></Button>
-            </Grid>
-            <!--<Button Grid.Row="0" Grid.Column="2" Text="InsertUP" Command="{Binding PickSort}" CommandParameter="3"></Button>
-            <Button Grid.Row="0" Grid.Column="3" Text="InsertDOWN" Command="{Binding PickSort}" CommandParameter="4"></Button>-->
         </Grid>
         <Grid Grid.Row="1" HorizontalOptions="Center">
             <CollectionView ItemsSource="{Binding Items}" ItemsLayout="HorizontalList">
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="y:Item">
                         <Grid ColumnDefinitions="1*" RowDefinitions="8*, 2*">
-                            <!--<Label Grid.Column="0" Grid.Row="1" Text="{Binding Value}"></Label>
-                            <Label Grid.Column="1" Grid.Row="1" Text="|"></Label>-->
                             <Rectangle Stroke="Black" StrokeThickness="1" VerticalOptions="End" BackgroundColor="{Binding Color}" Grid.Column="0" Grid.Row="0" HeightRequest="{Binding Value}" WidthRequest="10.5"></Rectangle>
                         </Grid>
                     </DataTemplate>

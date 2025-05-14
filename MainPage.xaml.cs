@@ -1,5 +1,7 @@
-﻿using System.Collections.ObjectModel;
+﻿using Microsoft.UI.Xaml.Input;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Windows.Input;
 namespace SortVizualizer
 {
@@ -10,6 +12,7 @@ namespace SortVizualizer
         {
             InitializeComponent();
             BindingContext = new VizualizerViewModel();
+            SortPicker.SelectedIndex = 0;
         }
 
         
@@ -19,14 +22,20 @@ namespace SortVizualizer
         private static readonly int min_speed = 2;
         private int _size = 100;
         private int _speed = 2;
+
         public int Size
         {
             get { return _size; }
             set
             {
-                if (_size != value && value > 1 && value <= 100)
+                if (value != null && value is int val && _size != val && val > 1 && val <= 100)
                 {
-                    _size = value;
+                    _size = val;
+                    IsGenerate = true;
+                }
+                else
+                {
+                    IsGenerate = false;
                 }
             }
         }
@@ -36,27 +45,27 @@ namespace SortVizualizer
             get { return _speed; }
             set
             {
-                if (value >= 1 || value <= 6 )
+                if (value >= 0 || value <= 5)
                 {
                     switch (value)
                     {
+                        case 0:
+                            _speed = min_speed * 5 * 5 * 5 * 5 * 5;
+                            break;
                         case 1:
-                            _speed = min_speed;
+                            _speed = min_speed * 5 * 5 * 5 * 5;
                             break;
                         case 2:
-                            _speed = min_speed*5;
+                            _speed = min_speed * 5 * 5 * 5;
                             break;
                         case 3:
-                            _speed = min_speed*5*5;
+                            _speed = min_speed * 5 * 5;
                             break;
                         case 4:
-                            _speed = min_speed*5*5*5;
+                            _speed = min_speed * 5;
                             break;
                         case 5:
-                            _speed = min_speed*5*5*5*5;
-                            break;
-                        case 6:
-                            _speed = min_speed*5*5*5*5*5;
+                            _speed = min_speed;
                             break;
                     }
                 }
@@ -66,7 +75,10 @@ namespace SortVizualizer
         public ICommand PickSort { get; set; }
         public ICommand ShuffleDataCommand { get; set; }
         public ICommand UpOrderCommand { get; set; }
-        public ICommand DownOrderCommand {  get; set; }
+        public ICommand DownOrderCommand { get; set; }
+
+        public bool IsSorting {get; set;}
+        public bool IsGenerate { get; set; }
 
         public delegate Task SortFunc(ObservableCollection<Item> data);
 
@@ -79,8 +91,6 @@ namespace SortVizualizer
                     
                     if (data[j] < data[j+1])
                     {
-                        data[j].Color = "Red";
-                        data[j+1].Color = "Red";
                         Item.Swap(data[j], data[j]);
                         Item.Swap(data[j + 1], data[j + 1]);
                         OnPropertyChanged(nameof(Items));
@@ -88,15 +98,12 @@ namespace SortVizualizer
                         await Task.Delay(Speed);
                         OnPropertyChanged(nameof(Items));
                     }
-                    data[j].Color = "Green";
-                    data[j+1].Color = "Green";
                     Item temp1 = new (data[j].Value);
                     data[j] = temp1.Assign(data[j]);
                     Item temp2 = new (data[j+1].Value);
                     data[j + 1] = temp2.Assign(data[j + 1]);
 
                 }
-                data[Size - 1 - i].Color = "Blue";
                 Item temp = new (data[Size - 1 - i].Value);
                 data[Size - 1 - i] = temp.Assign(data[Size - 1 - i]);
                 OnPropertyChanged(nameof(Items));
@@ -112,8 +119,6 @@ namespace SortVizualizer
 
                     if (data[j] > data[j + 1])
                     {
-                        data[j].Color = "Red";
-                        data[j + 1].Color = "Red";
                         Item.Swap(data[j], data[j]);
                         Item.Swap(data[j + 1], data[j + 1]);
                         OnPropertyChanged(nameof(Items));
@@ -121,15 +126,12 @@ namespace SortVizualizer
                         await Task.Delay(Speed);
                         OnPropertyChanged(nameof(Items));
                     }
-                    data[j].Color = "Green";
-                    data[j + 1].Color = "Green";
                     Item temp1 = new (data[j].Value);
                     data[j] = temp1.Assign(data[j]);
                     Item temp2 = new (data[j + 1].Value);
                     data[j + 1] = temp2.Assign(data[j + 1]);
 
                 }
-                data[Size - 1 - i].Color = "Blue";
                 Item temp = new (data[Size - 1 - i].Value);
                 data[Size - 1 - i] = temp.Assign(data[Size - 1 - i]);
                 OnPropertyChanged(nameof(Items));
@@ -143,8 +145,6 @@ namespace SortVizualizer
                 int min_index = i;
                 for (int j = i; j < Size; j++)
                 {
-                    data[i].Color = "Red";
-                    data[j].Color = "Red";
                     (data[i], data[j]) = (data[j], data[i]);
                     (data[i], data[j]) = (data[j], data[i]);
                     OnPropertyChanged(nameof(data));
@@ -153,11 +153,8 @@ namespace SortVizualizer
                     {
                         min_index = j;
                     }
-                    data[j].Color = "Green";
-                    data[j].Color = "Green";
                 }
                 (data[i], data[min_index]) = (data[min_index], data[i]);
-                data[i].Color = "Blue";
                 OnPropertyChanged(nameof(Items));
                 await Task.Delay(Speed);
             }
@@ -170,8 +167,6 @@ namespace SortVizualizer
                 int max_index = i;
                 for (int j = i; j < Size; j++)
                 {
-                    data[i].Color = "Red";
-                    data[j].Color = "Red";
                     (data[i], data[j]) = (data[j], data[i]);
                     (data[i], data[j]) = (data[j], data[i]);
                     OnPropertyChanged(nameof(data));
@@ -180,11 +175,8 @@ namespace SortVizualizer
                     {
                         max_index = j;
                     }
-                    data[j].Color = "Green";
-                    data[j].Color = "Green";
                 }
                 (data[i], data[max_index]) = (data[max_index], data[i]);
-                data[i].Color = "Blue";
                 OnPropertyChanged(nameof(Items));
                 await Task.Delay(Speed);
             }
@@ -193,19 +185,15 @@ namespace SortVizualizer
         private async Task HeapifyDown(ObservableCollection<Item> data, int cur_n, int i)
         {
             int largest = i;
-            data[i].Color = "Red";
             int l = 2 * i + 1;
             int r = 2 * i + 2;
             if (l < cur_n && data[i] < data[l])
             {
                 largest = l;
-                data[largest].Color = "Red";
             }
             if (r < cur_n && data[r] > data[largest])
             {
-                data[largest].Color = "Green";
                 largest = r;
-                data[largest].Color = "Red";
             }
 
             if (largest != i)   
@@ -214,8 +202,6 @@ namespace SortVizualizer
                 OnPropertyChanged(nameof(Items));
                 await Task.Delay(Speed);
                 await HeapifyDown(data, cur_n, largest);
-                data[largest].Color = "Green";
-                data[i].Color = "Green";
             }
         }
 
@@ -227,7 +213,6 @@ namespace SortVizualizer
                 for (int i = cur_n / 2 - 1; i >= 0; i--)
                     await HeapifyDown(data, cur_n, i);
                 Item item = data[0];
-                item.Color = "Blue";
                 data.Remove(data[0]);
                 OnPropertyChanged(nameof(Items));
                 data.Add(item);
@@ -240,19 +225,15 @@ namespace SortVizualizer
         private async Task HeapifyUp(ObservableCollection<Item> data, int cur_n, int i)
         {
             int smallest = i;
-            data[i].Color = "Red";
             int l = 2 * i + 1;
             int r = 2 * i + 2;
             if (l < cur_n && data[i] > data[l])
             {
                 smallest = l;
-                data[smallest].Color = "Red";
             }
             if (r < cur_n && data[r] < data[smallest])
             {
-                data[smallest].Color = "Green";
                 smallest = r;
-                data[smallest].Color = "Red";
             }
 
             if (smallest != i)
@@ -261,8 +242,6 @@ namespace SortVizualizer
                 OnPropertyChanged(nameof(Items));
                 await Task.Delay(Speed);
                 await HeapifyUp(data, cur_n, smallest);
-                data[smallest].Color = "Green";
-                data[i].Color = "Green";
             }
         }
 
@@ -274,7 +253,6 @@ namespace SortVizualizer
                 for (int i = cur_n / 2 - 1; i >= 0; i--)
                     await HeapifyUp(data, cur_n, i);
                 Item item = data[0];
-                item.Color = "Blue";
                 data.Remove(data[0]);
                 OnPropertyChanged(nameof(Items));
                 data.Add(item);
@@ -291,8 +269,6 @@ namespace SortVizualizer
                 Item key = data[i];
                 while (j >= 0 && data[j] > key)
                 {
-                    data[j + 1].Color = "Red";
-                    data[j].Color = "Red";
                     data[j + 1] = data[j];
                     OnPropertyChanged(nameof(data));
                     await Task.Delay(Speed);
@@ -312,8 +288,6 @@ namespace SortVizualizer
                 Item key = data[i];
                 while (j >= 0 && data[j] < key)
                 {
-                    data[j + 1].Color = "Red";
-                    data[j].Color = "Red";
                     data[j + 1] = data[j];
                     OnPropertyChanged(nameof(data));
                     await Task.Delay(Speed);
@@ -467,8 +441,6 @@ namespace SortVizualizer
                 {
                     i++;
                     (data[i], data[j]) = (data[j], data[i]);
-                    data[i].Color = "Red";
-                    data[j].Color = "Red";
                 }
             }
             (data[i+1], data[high]) = (data[high], data[i+1]);
@@ -504,8 +476,6 @@ namespace SortVizualizer
                 {
                     i++;
                     (data[i], data[j]) = (data[j], data[i]);
-                    data[i].Color = "Red";
-                    data[j].Color = "Red";
                 }
             }
 
@@ -543,9 +513,9 @@ namespace SortVizualizer
 
             List<Item> list = new List<Item>();
             Random random = new();
-            foreach (Item item in data)
+            for (int i = 1;i<Size+1; i++)
             {
-                list.Add(item);
+                list.Add(new Item(i * 3));
             }
             Span<Item> span = new(list.ToArray());
             random.Shuffle(span);
@@ -582,72 +552,85 @@ namespace SortVizualizer
 
         public VizualizerViewModel()
         {
-            PickSort = new Command<object>(PickSortFunc);
-            ShuffleDataCommand = new Command<object>(ShuffleData);
-            UpOrderCommand = new Command<object>(UpOrder);
-            DownOrderCommand = new Command<object>(DownOrder);
-
+            PickSort = new Command<object>(execute: (parametr) => { PickSortFunc(parametr); IsSorting = true; RefreshCanExecute(); }, canExecute: (NULL) => { return !IsSorting; });
+            ShuffleDataCommand = new Command<object>(execute: (Items) => { ShuffleData(Items); IsSorting = false; RefreshCanExecute(); }, canExecute: (NULL) => { return !IsSorting; });
+            UpOrderCommand = new Command<object>(execute: (Items) => { UpOrder(Items); IsSorting = false; RefreshCanExecute(); }, canExecute: (NULL) => { return !IsSorting; }); ;
+            DownOrderCommand = new Command<object>(execute: (Items) => { DownOrder(Items);  IsSorting = false; RefreshCanExecute(); }, canExecute: (NULL) => { return !IsSorting; }); ;
             Items = [];
+            IsGenerate = false;
             for (int i = 1; i < Size +1; i++)
             {
                 Items.Add(new Item(i*3));
             }
         }
 
-        public event PropertyChangedEventHandler? PropertyChanged;
+        void OnPickerSelectedIndexChanged(object sender, EventArgs e) {
+            var picker = (Picker)sender;
+            Speed = picker.SelectedIndex + 1;
+        }
 
+        void RefreshCanExecute()
+        {
+            (PickSort as Command).ChangeCanExecute();
+            (ShuffleDataCommand as Command).ChangeCanExecute();
+            (UpOrderCommand as Command).ChangeCanExecute();
+            (DownOrderCommand as Command).ChangeCanExecute();
+        }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
         private async void PickSortFunc(object parametr)
         {
             await PickSortFunc(parametr, Items);
         }
-
         private async Task PickSortFunc(object parametr, ObservableCollection<Item> items)
         {
             if (parametr is string strParam)
             {
-                var SortId = int.Parse(strParam);
-                switch (SortId)
+                switch (parametr.ToString())
                 {
-                    case 1:
+                    case "Пузырьком по возрастанию":
                         await Sort(items, BubleSortUp);
                         break;
-                    case 2:
+                    case "Пузырьком по убыванию":
                         await Sort(items, BubleSortDown);
                         break;
-                    case 3:
+                    case "Выборами по возрастанию":
                         await Sort(items, SelectionUp);
                         break;
-                    case 4:
+                    case "Выборами по убыванию":
                         await Sort(items, SelectionDown);
                         break;
-                    case 5:
+                    case "Кучей по убыванию":
                         await Sort(items, HeapSortDown);
                         break;
-                    case 6:
+                    case "Кучей по возрастанию":
                         await Sort(items, HeapSortUp);
                         break;
-                    case 7:
+                    case "Вставками по убыванию":
                         await Sort(items, InsertSortDown);
                         break;
-                    case 8:
+                    case "Вставками по возрастанию":
                         await Sort(items, InsertSortUp);
                         break;
-                    case 9:
+                    case "Слиянием по возрастанию":
                         await Sort(items, MergeSortUp);
                         break;
-                    case 10:
+                    case "Слиянием по убыванию":
                         await Sort(items, MergeSortDown);
                         break;
-                    case 11:
+                    case "Быстрая сортировка по возрастанию":
                         await Sort(items, QuickSortUp);
                         break;
-                    case 12:
+                    case "Быстрая сортировка по убыванию":
                         await Sort(items, QuickSortDown);
                         break;
                     default:
                         break;
                 }
             }
+            await Task.Delay(1000);
+            IsSorting = false;
+            RefreshCanExecute();
         }
 
 
@@ -678,7 +661,7 @@ namespace SortVizualizer
         private int _value;
         private string _color = "";
 
-        public Item(int i) { Value = i; Color = "Green"; }
+        public Item(int i) { Value = i; Color = "White"; }
         public static bool operator >(Item item1, Item item2)
         {
             return item1.Value > item2.Value;
