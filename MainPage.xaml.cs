@@ -22,6 +22,7 @@ namespace SortVizualizer
         private static readonly int min_speed = 2;
         private int _size = 100;
         private int _speed = 2;
+        private CancellationTokenSource cts;
 
         public int Size
         {
@@ -32,6 +33,7 @@ namespace SortVizualizer
                 {
                     _size = val;
                     IsGenerate = true;
+                    RefreshCanExecute();
                 }
                 else
                 {
@@ -77,8 +79,10 @@ namespace SortVizualizer
         public ICommand UpOrderCommand { get; set; }
         public ICommand DownOrderCommand { get; set; }
 
+        public ICommand StopCommand { get; set; }
         public bool IsSorting {get; set;}
         public bool IsGenerate { get; set; }
+
 
         public delegate Task SortFunc(ObservableCollection<Item> data);
 
@@ -88,21 +92,23 @@ namespace SortVizualizer
             {
                 for (int j=0;j< Size - 1-i;j++)
                 {
-                    
-                    if (data[j] < data[j+1])
+                    if (!cts.Token.IsCancellationRequested)
                     {
-                        Item.Swap(data[j], data[j]);
-                        Item.Swap(data[j + 1], data[j + 1]);
-                        OnPropertyChanged(nameof(Items));
-                        Item.Swap(data[j], data[j + 1]);
-                        await Task.Delay(Speed);
-                        OnPropertyChanged(nameof(Items));
+                        if (data[j] < data[j + 1])
+                        {
+                            Item.Swap(data[j], data[j]);
+                            Item.Swap(data[j + 1], data[j + 1]);
+                            OnPropertyChanged(nameof(Items));
+                            Item.Swap(data[j], data[j + 1]);
+                            await Task.Delay(Speed);
+                            OnPropertyChanged(nameof(Items));
+                        }
+                        Item temp1 = new(data[j].Value);
+                        data[j] = temp1.Assign(data[j]);
+                        Item temp2 = new(data[j + 1].Value);
+                        data[j + 1] = temp2.Assign(data[j + 1]);
                     }
-                    Item temp1 = new (data[j].Value);
-                    data[j] = temp1.Assign(data[j]);
-                    Item temp2 = new (data[j+1].Value);
-                    data[j + 1] = temp2.Assign(data[j + 1]);
-
+                    else return;
                 }
                 Item temp = new (data[Size - 1 - i].Value);
                 data[Size - 1 - i] = temp.Assign(data[Size - 1 - i]);
@@ -116,21 +122,23 @@ namespace SortVizualizer
             {
                 for (int j = 0; j < Size - 1 - i; j++)
                 {
-
-                    if (data[j] > data[j + 1])
+                    if (!cts.Token.IsCancellationRequested)
                     {
-                        Item.Swap(data[j], data[j]);
-                        Item.Swap(data[j + 1], data[j + 1]);
-                        OnPropertyChanged(nameof(Items));
-                        Item.Swap(data[j], data[j + 1]);
-                        await Task.Delay(Speed);
-                        OnPropertyChanged(nameof(Items));
+                        if (data[j] > data[j + 1])
+                        {
+                            Item.Swap(data[j], data[j]);
+                            Item.Swap(data[j + 1], data[j + 1]);
+                            OnPropertyChanged(nameof(Items));
+                            Item.Swap(data[j], data[j + 1]);
+                            await Task.Delay(Speed);
+                            OnPropertyChanged(nameof(Items));
+                        }
+                        Item temp1 = new(data[j].Value);
+                        data[j] = temp1.Assign(data[j]);
+                        Item temp2 = new(data[j + 1].Value);
+                        data[j + 1] = temp2.Assign(data[j + 1]);
                     }
-                    Item temp1 = new (data[j].Value);
-                    data[j] = temp1.Assign(data[j]);
-                    Item temp2 = new (data[j + 1].Value);
-                    data[j + 1] = temp2.Assign(data[j + 1]);
-
+                    else return;
                 }
                 Item temp = new (data[Size - 1 - i].Value);
                 data[Size - 1 - i] = temp.Assign(data[Size - 1 - i]);
@@ -145,14 +153,18 @@ namespace SortVizualizer
                 int min_index = i;
                 for (int j = i; j < Size; j++)
                 {
-                    (data[i], data[j]) = (data[j], data[i]);
-                    (data[i], data[j]) = (data[j], data[i]);
-                    OnPropertyChanged(nameof(data));
-                    await Task.Delay(Speed);
-                    if (data[j] < data[i])
+                    if (!cts.Token.IsCancellationRequested)
                     {
-                        min_index = j;
+                        (data[i], data[j]) = (data[j], data[i]);
+                        (data[i], data[j]) = (data[j], data[i]);
+                        OnPropertyChanged(nameof(data));
+                        await Task.Delay(Speed);
+                        if (data[j] < data[i])
+                        {
+                            min_index = j;
+                        }
                     }
+                    else return;
                 }
                 (data[i], data[min_index]) = (data[min_index], data[i]);
                 OnPropertyChanged(nameof(Items));
@@ -167,14 +179,18 @@ namespace SortVizualizer
                 int max_index = i;
                 for (int j = i; j < Size; j++)
                 {
-                    (data[i], data[j]) = (data[j], data[i]);
-                    (data[i], data[j]) = (data[j], data[i]);
-                    OnPropertyChanged(nameof(data));
-                    await Task.Delay(Speed);
-                    if (data[j] > data[i])
+                    if (!cts.Token.IsCancellationRequested)
                     {
-                        max_index = j;
+                        (data[i], data[j]) = (data[j], data[i]);
+                        (data[i], data[j]) = (data[j], data[i]);
+                        OnPropertyChanged(nameof(data));
+                        await Task.Delay(Speed);
+                        if (data[j] > data[i])
+                        {
+                            max_index = j;
+                        }
                     }
+                    else return;
                 }
                 (data[i], data[max_index]) = (data[max_index], data[i]);
                 OnPropertyChanged(nameof(Items));
@@ -184,25 +200,29 @@ namespace SortVizualizer
 
         private async Task HeapifyDown(ObservableCollection<Item> data, int cur_n, int i)
         {
-            int largest = i;
-            int l = 2 * i + 1;
-            int r = 2 * i + 2;
-            if (l < cur_n && data[i] < data[l])
+            if (!cts.Token.IsCancellationRequested)
             {
-                largest = l;
-            }
-            if (r < cur_n && data[r] > data[largest])
-            {
-                largest = r;
-            }
+                int largest = i;
+                int l = 2 * i + 1;
+                int r = 2 * i + 2;
+                if (l < cur_n && data[i] < data[l])
+                {
+                    largest = l;
+                }
+                if (r < cur_n && data[r] > data[largest])
+                {
+                    largest = r;
+                }
 
-            if (largest != i)   
-            {
-                (data[largest], data[i]) = (data[i], data[largest]);
-                OnPropertyChanged(nameof(Items));
-                await Task.Delay(Speed);
-                await HeapifyDown(data, cur_n, largest);
+                if (largest != i)
+                {
+                    (data[largest], data[i]) = (data[i], data[largest]);
+                    OnPropertyChanged(nameof(Items));
+                    await Task.Delay(Speed);
+                    await HeapifyDown(data, cur_n, largest);
+                }
             }
+            else return;
         }
 
         public async Task HeapSortDown(ObservableCollection<Item> data)
@@ -224,25 +244,29 @@ namespace SortVizualizer
 
         private async Task HeapifyUp(ObservableCollection<Item> data, int cur_n, int i)
         {
-            int smallest = i;
-            int l = 2 * i + 1;
-            int r = 2 * i + 2;
-            if (l < cur_n && data[i] > data[l])
+            if (!cts.Token.IsCancellationRequested)
             {
-                smallest = l;
-            }
-            if (r < cur_n && data[r] < data[smallest])
-            {
-                smallest = r;
-            }
+                int smallest = i;
+                int l = 2 * i + 1;
+                int r = 2 * i + 2;
+                if (l < cur_n && data[i] > data[l])
+                {
+                    smallest = l;
+                }
+                if (r < cur_n && data[r] < data[smallest])
+                {
+                    smallest = r;
+                }
 
-            if (smallest != i)
-            {
-                (data[smallest], data[i]) = (data[i], data[smallest]);
-                OnPropertyChanged(nameof(Items));
-                await Task.Delay(Speed);
-                await HeapifyUp(data, cur_n, smallest);
+                if (smallest != i)
+                {
+                    (data[smallest], data[i]) = (data[i], data[smallest]);
+                    OnPropertyChanged(nameof(Items));
+                    await Task.Delay(Speed);
+                    await HeapifyUp(data, cur_n, smallest);
+                }
             }
+            else return;
         }
 
         public async Task HeapSortUp(ObservableCollection<Item> data)
@@ -269,10 +293,14 @@ namespace SortVizualizer
                 Item key = data[i];
                 while (j >= 0 && data[j] > key)
                 {
-                    data[j + 1] = data[j];
-                    OnPropertyChanged(nameof(data));
-                    await Task.Delay(Speed);
-                    j -= 1;
+                    if (!cts.Token.IsCancellationRequested)
+                    {
+                        data[j + 1] = data[j];
+                        OnPropertyChanged(nameof(data));
+                        await Task.Delay(Speed);
+                        j -= 1;
+                    }
+                    else return;
                 }
                 data[j + 1] = key;
                 OnPropertyChanged(nameof(data));
@@ -288,10 +316,14 @@ namespace SortVizualizer
                 Item key = data[i];
                 while (j >= 0 && data[j] < key)
                 {
-                    data[j + 1] = data[j];
-                    OnPropertyChanged(nameof(data));
-                    await Task.Delay(Speed);
-                    j -= 1;
+                    if (!cts.Token.IsCancellationRequested)
+                    {
+                        data[j + 1] = data[j];
+                        OnPropertyChanged(nameof(data));
+                        await Task.Delay(Speed);
+                        j -= 1;
+                    }
+                    else return;
                 }
                 data[j + 1] = key;
                 OnPropertyChanged(nameof(data));
@@ -352,10 +384,14 @@ namespace SortVizualizer
         {
             if (l < r)
             {
-                int m = l + (r - l) / 2;
-                await MergeSortApiUp(data, l, m);
-                await MergeSortApiUp(data, m + 1, r);
-                await MergeUp(data, l, m, r);
+                if (!cts.Token.IsCancellationRequested)
+                {
+                    int m = l + (r - l) / 2;
+                    await MergeSortApiUp(data, l, m);
+                    await MergeSortApiUp(data, m + 1, r);
+                    await MergeUp(data, l, m, r);
+                }
+                else return;
             }
         }
 
@@ -381,47 +417,63 @@ namespace SortVizualizer
             int k = l;
             while (i < n1 && j < n2)
             {
-                if (L[i].Value >= R[j].Value)
+                if (!cts.Token.IsCancellationRequested)
+                {
+                    if (L[i].Value >= R[j].Value)
+                    {
+                        data[k] = L[i];
+                        OnPropertyChanged(nameof(data));
+                        await Task.Delay(Speed);
+                        i++;
+                    }
+                    else
+                    {
+                        OnPropertyChanged(nameof(data));
+                        await Task.Delay(Speed);
+                        data[k] = R[j];
+                        j++;
+                    }
+                    k++;
+                }
+                else return;
+            }
+            while (i < n1)
+            {
+                if (!cts.Token.IsCancellationRequested)
                 {
                     data[k] = L[i];
                     OnPropertyChanged(nameof(data));
                     await Task.Delay(Speed);
                     i++;
+                    k++;
                 }
-                else
-                {
-                    OnPropertyChanged(nameof(data));
-                    await Task.Delay(Speed);
-                    data[k] = R[j];
-                    j++;
-                }
-                k++;
-            }
-            while (i < n1)
-            {
-                data[k] = L[i];
-                OnPropertyChanged(nameof(data));
-                await Task.Delay(Speed);
-                i++;
-                k++;
+                else return;
             }
             while (j < n2)
             {
-                data[k] = R[j];
-                OnPropertyChanged(nameof(data));
-                await Task.Delay(Speed);
-                j++;
-                k++;
+                if (!cts.Token.IsCancellationRequested)
+                {
+                    data[k] = R[j];
+                    OnPropertyChanged(nameof(data));
+                    await Task.Delay(Speed);
+                    j++;
+                    k++;
+                }
+                else return;
             }
         }
         public async Task MergeSortApiDown(ObservableCollection<Item> data, int l, int r)
         {
             if (l < r)
             {
-                int m = l + (r - l) / 2;
-                await MergeSortApiDown(data, l, m);
-                await MergeSortApiDown(data, m + 1, r);
-                await MergeDown(data, l, m, r);
+                if (!cts.Token.IsCancellationRequested)
+                {
+                    int m = l + (r - l) / 2;
+                    await MergeSortApiDown(data, l, m);
+                    await MergeSortApiDown(data, m + 1, r);
+                    await MergeDown(data, l, m, r);
+                }
+                else return;
             }
         }
 
@@ -451,11 +503,15 @@ namespace SortVizualizer
         {
             if (low < high)
             {
-                int pi = PartitionUp(data, low, high);
-                OnPropertyChanged(nameof(data));
-                await Task.Delay(Speed);
-                await QuickSortApiUp(data, low, pi - 1);
-                await QuickSortApiUp(data, pi + 1, high);
+                if (!cts.Token.IsCancellationRequested)
+                {
+                    int pi = PartitionUp(data, low, high);
+                    OnPropertyChanged(nameof(data));
+                    await Task.Delay(Speed);
+                    await QuickSortApiUp(data, low, pi - 1);
+                    await QuickSortApiUp(data, pi + 1, high);
+                }
+                else return;
             }
         }
         public async Task QuickSortUp (ObservableCollection<Item> data)
@@ -480,6 +536,7 @@ namespace SortVizualizer
             }
 
             (data[i + 1], data[high]) = (data[high], data[i + 1]);
+
             return Task<int>.Factory.StartNew(() => i+1);
         }
 
@@ -487,12 +544,16 @@ namespace SortVizualizer
         {
             if (low < high)
             {
-                int pi = PartitionDown(data, low, high).Result;
-                OnPropertyChanged(nameof(data));
-                await Task.Delay(Speed);
-                
-                await QuickSortApiDown(data, low, pi - 1);
-                await QuickSortApiDown(data, pi + 1, high);
+                if (!cts.Token.IsCancellationRequested)
+                {
+                    int pi = PartitionDown(data, low, high).Result;
+                    OnPropertyChanged(nameof(data));
+                    await Task.Delay(Speed);
+
+                    await QuickSortApiDown(data, low, pi - 1);
+                    await QuickSortApiDown(data, pi + 1, high);
+                }
+                else return;
             }
         }
         public async Task QuickSortDown(ObservableCollection<Item> data)
@@ -552,16 +613,24 @@ namespace SortVizualizer
 
         public VizualizerViewModel()
         {
-            PickSort = new Command<object>(execute: (parametr) => { PickSortFunc(parametr); IsSorting = true; RefreshCanExecute(); }, canExecute: (NULL) => { return !IsSorting; });
-            ShuffleDataCommand = new Command<object>(execute: (Items) => { ShuffleData(Items); IsSorting = false; RefreshCanExecute(); }, canExecute: (NULL) => { return !IsSorting; });
-            UpOrderCommand = new Command<object>(execute: (Items) => { UpOrder(Items); IsSorting = false; RefreshCanExecute(); }, canExecute: (NULL) => { return !IsSorting; }); ;
-            DownOrderCommand = new Command<object>(execute: (Items) => { DownOrder(Items);  IsSorting = false; RefreshCanExecute(); }, canExecute: (NULL) => { return !IsSorting; }); ;
+            PickSort = new Command<object>(execute: (parametr) => { PickSortFunc(parametr); IsSorting = true; RefreshCanExecute(); }, canExecute: (NULL) => { return !(IsSorting || IsGenerate); });
+            ShuffleDataCommand = new Command<object>(execute: (Items) => { ShuffleData(Items); IsGenerate = false; RefreshCanExecute(); }, canExecute: (NULL) => { return !IsSorting; });
+            UpOrderCommand = new Command<object>(execute: (Items) => { UpOrder(Items); IsGenerate = false; RefreshCanExecute(); }, canExecute: (NULL) => { return !IsSorting; }); ;
+            DownOrderCommand = new Command<object>(execute: (Items) => { DownOrder(Items); IsGenerate = false; RefreshCanExecute(); }, canExecute: (NULL) => { return !IsSorting; });
+            StopCommand = new Command(execute: () => { StopSort(); RefreshCanExecute(); }, canExecute: () => { return IsSorting; });
             Items = [];
+            RefreshCanExecute();
             IsGenerate = false;
+            cts = new CancellationTokenSource();
             for (int i = 1; i < Size +1; i++)
             {
                 Items.Add(new Item(i*3));
             }
+        }
+
+        void StopSort()
+        {
+            cts.Cancel();
         }
 
         void OnPickerSelectedIndexChanged(object sender, EventArgs e) {
@@ -575,6 +644,7 @@ namespace SortVizualizer
             (ShuffleDataCommand as Command).ChangeCanExecute();
             (UpOrderCommand as Command).ChangeCanExecute();
             (DownOrderCommand as Command).ChangeCanExecute();
+            (StopCommand as Command).ChangeCanExecute();
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -631,6 +701,8 @@ namespace SortVizualizer
             await Task.Delay(1000);
             IsSorting = false;
             RefreshCanExecute();
+            cts.Dispose();
+            cts = new CancellationTokenSource();
         }
 
 
